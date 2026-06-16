@@ -1,9 +1,11 @@
+using System.Security.Claims;
 using FlowSpace.Application.Diagrams.Commands.CreateEdge;
 using FlowSpace.Application.Diagrams.Commands.CreateNode;
 using FlowSpace.Application.Diagrams.Commands.DeleteEdge;
 using FlowSpace.Application.Diagrams.Commands.DeleteNode;
 using FlowSpace.Application.Diagrams.Commands.UpdateNode;
 using FlowSpace.Application.Diagrams.Queries.GetElements;
+using FlowSpace.Application.Common.Abstractions.Authorization;
 using FlowSpace.Contracts.Diagrams;
 using FlowSpace.Domain.Authorization;
 using MediatR;

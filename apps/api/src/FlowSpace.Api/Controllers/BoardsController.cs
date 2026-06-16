@@ -5,6 +5,7 @@ using FlowSpace.Application.Boards.Commands.UpdateBoard;
 using FlowSpace.Application.Boards.Commands.UpdateWhiteboard;
 using FlowSpace.Application.Boards.Queries.ListBoards;
 using FlowSpace.Application.Boards.Queries.GetWhiteboard;
+using FlowSpace.Application.Common.Abstractions.Authorization;
 using FlowSpace.Contracts.Boards;
 using FlowSpace.Domain.Authorization;
 using MediatR;
