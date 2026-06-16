@@ -1,0 +1,94 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: flowspace-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-flowspace}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secure_db_password}
+      POSTGRES_DB: ${POSTGRES_DB:-flowspace_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flowspace} -d ${POSTGRES_DB:-flowspace_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flowspace-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: flowspace-redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD:-secure_redis_password}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-secure_redis_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - flowspace-net
+
+  api:
+    build: 
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: flowspace-api
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-flowspace_db};Username=${POSTGRES_USER:-flowspace};Password=${POSTGRES_PASSWORD:-secure_db_password};
+      - Redis__ConnectionString=redis,password=${REDIS_PASSWORD:-secure_redis_password}
+      - Jwt__Secret=${JWT_SECRET:-your_super_secret_key_that_must_be_at_least_32_characters_long}
+      - Jwt__Issuer=${JWT_ISSUER:-FlowSpace}
+      - Jwt__Audience=${JWT_AUDIENCE:-FlowSpaceClient}
+      - Gemini__ApiKey=${GEMINI_API_KEY}
+      - FrontendUrl=${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "5000:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - flowspace-net
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: flowspace-web
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:5000/api/v1}
+      - NEXT_PUBLIC_HUB_URL=${NEXT_PUBLIC_HUB_URL:-http://localhost:5000/hubs/collaboration}
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - flowspace-net
+
+networks:
+  flowspace-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:

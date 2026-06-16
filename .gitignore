@@ -1,0 +1,32 @@
+# .NET
+[Bb]in/
+[Oo]bj/
+*.user
+*.userosscache
+*.sln.docuser
+.vs/
+.vscode/
+
+# Node
+node_modules/
+dist/
+.next/
+out/
+.vercel
+*.tsbuildinfo
+
+# Environment
+.env
+.env.*
+!.env.template
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Playwright
+.playwright/
+
+# Database
+*.sql.gz

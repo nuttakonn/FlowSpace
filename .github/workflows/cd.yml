@@ -1,0 +1,38 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-backend:
+    name: Deploy Backend (Render/Koyeb)
+    runs-on: ubuntu-latest
+    # Optional: Ensure CI passes first
+    # needs: [build-and-test-api] # If I merge CI and CD into one file, I could do this.
+    
+    steps:
+    - name: Trigger Deploy Hook
+      run: |
+        if [ -n "${{ secrets.BACKEND_DEPLOY_HOOK }}" ]; then
+          curl -X GET "${{ secrets.BACKEND_DEPLOY_HOOK }}"
+          echo "✅ Backend deployment triggered."
+        else
+          echo "⚠️ BACKEND_DEPLOY_HOOK not set, skipping backend deploy."
+        fi
+
+  deploy-frontend:
+    name: Deploy Frontend (Vercel)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Deploy to Vercel
+      uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        vercel-args: '--prod'
+        working-directory: ./apps/web

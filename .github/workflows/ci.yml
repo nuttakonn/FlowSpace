@@ -1,0 +1,51 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test-api:
+    name: Build & Test API (.NET)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore apps/api/FlowSpace.slnx
+      
+    - name: Build
+      run: dotnet build apps/api/FlowSpace.slnx --configuration Release --no-restore
+      
+    - name: Test
+      run: dotnet test apps/api/FlowSpace.slnx --configuration Release --no-build --verbosity normal
+
+  build-web:
+    name: Build Web (Next.js)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+        cache-dependency-path: 'apps/web/package-lock.json'
+        
+    - name: Install dependencies
+      working-directory: ./apps/web
+      run: npm ci
+      
+    - name: Build
+      working-directory: ./apps/web
+      run: npm run build
+      env:
+        NEXT_TELEMETRY_DISABLED: 1

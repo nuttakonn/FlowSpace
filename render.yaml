@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: flowspace-api
+    runtime: docker
+    dockerContext: .
+    dockerfilePath: apps/api/Dockerfile
+    plan: free # Note: Playwright might require more RAM than the free tier (512MB) provides
+    region: frankfurt
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Cloud
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: Jwt__Secret
+        generateValue: true
+      - key: Jwt__Issuer
+        value: FlowSpace
+      - key: Jwt__Audience
+        value: FlowSpaceClient
+      - key: Gemini__ApiKey
+        sync: false
+      - key: AllowedOrigins
+        sync: false
+      - key: ApplyMigrationsOnStartup
+        value: "true"
+    healthCheckPath: /health
+    autoDeploy: true
