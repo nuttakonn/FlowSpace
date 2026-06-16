@@ -30,3 +30,7 @@ Thumbs.db
 
 # Database
 *.sql.gz
+
+*.suo
+
+Docker volumes/

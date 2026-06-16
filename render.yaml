@@ -9,19 +9,27 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Cloud
+      - key: PORT
+        value: 8080
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:8080
+      - key: ASPNETCORE_HTTP_PORTS
+        value: 8080
       - key: ConnectionStrings__DefaultConnection
         sync: false
       - key: REDIS_URL
         sync: false
-      - key: Jwt__Secret
+      - key: JwtSettings__Secret
         generateValue: true
-      - key: Jwt__Issuer
+      - key: JwtSettings__Issuer
         value: FlowSpace
-      - key: Jwt__Audience
+      - key: JwtSettings__Audience
         value: FlowSpaceClient
       - key: Gemini__ApiKey
         sync: false
       - key: AllowedOrigins
+        sync: false
+      - key: FrontendUrl
         sync: false
       - key: ApplyMigrationsOnStartup
         value: "true"

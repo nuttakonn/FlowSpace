@@ -108,20 +108,27 @@ if (!builder.Environment.IsDevelopment())
 
 var app = builder.Build();
 
-// Enable Forwarded Headers for Cloud Proxies (Render/Koyeb)
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+// 1. Health Checks - Must be first to respond immediately to Render's port detection and health checks
+// This bypasses all middleware (Auth, Redirection, Rate Limiting) for efficiency.
+app.UseHealthChecks("/health");
+
+// 2. Enable Forwarded Headers for Cloud Proxies (Render/Koyeb)
+// This must be early to ensure correct protocol (HTTP/HTTPS) detection.
+var forwardedOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
+};
+forwardedOptions.KnownNetworks.Clear();
+forwardedOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedOptions);
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-if (!app.Environment.IsDevelopment())
+// 3. HTTPS Redirection - Disabled in Cloud/Production as Render handles SSL termination
+if (app.Environment.IsDevelopment())
 {
-    app.UseHsts();
+    app.UseHttpsRedirection();
 }
-
-app.UseHttpsRedirection();
 
 if (app.Environment.IsProduction() || app.Environment.EnvironmentName == "Cloud")
 {
@@ -134,18 +141,18 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers().RequireRateLimiting("GlobalLimit");
-// Apply stricter limit to Auth controller specifically in your implementation if needed, 
-// or keep it global. For safety, we apply GlobalLimit to all.
-
 app.MapHub<CollaborationHub>("/hubs/collaboration");
-app.MapHealthChecks("/health");
 
-// Apply Migrations if configured
-if (builder.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
+// 4. Start the Application and then Apply Migrations
+// We use RunAsync() to start the host immediately so that Render detects the open port.
+// Then we run migrations in the background.
+var runTask = app.RunAsync();
+
+if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
 {
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await dbContext.Database.MigrateAsync();
 }
 
-app.Run();
+await runTask;

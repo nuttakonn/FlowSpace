@@ -40,17 +40,17 @@ services:
 
   api:
     build: 
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     container_name: flowspace-api
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=${POSTGRES_DB:-flowspace_db};Username=${POSTGRES_USER:-flowspace};Password=${POSTGRES_PASSWORD:-secure_db_password};
       - Redis__ConnectionString=redis,password=${REDIS_PASSWORD:-secure_redis_password}
-      - Jwt__Secret=${JWT_SECRET:-your_super_secret_key_that_must_be_at_least_32_characters_long}
-      - Jwt__Issuer=${JWT_ISSUER:-FlowSpace}
-      - Jwt__Audience=${JWT_AUDIENCE:-FlowSpaceClient}
+      - JwtSettings__Secret=${JWT_SECRET:-your_super_secret_key_that_must_be_at_least_32_characters_long}
+      - JwtSettings__Issuer=${JWT_ISSUER:-FlowSpace}
+      - JwtSettings__Audience=${JWT_AUDIENCE:-FlowSpaceClient}
       - Gemini__ApiKey=${GEMINI_API_KEY}
       - FrontendUrl=${FRONTEND_URL:-http://localhost:3000}
     ports:

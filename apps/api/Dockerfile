@@ -22,11 +22,14 @@ FROM mcr.microsoft.com/playwright/dotnet:v1.44.0-jammy AS runtime
 WORKDIR /app
 
 # Expose the default ASP.NET Core port
+# Render will automatically detect this or use the PORT env var
 EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 
 # Copy the published SELF-CONTAINED output from the build stage
 COPY --from=build /app/publish .
 
 # For self-contained apps, we execute the generated binary directly
+# We use a shell form to ensure environment variables like PORT are processed if we wanted to 
+# but .NET 8+ handles ASPNETCORE_HTTP_PORTS well.
 ENTRYPOINT ["./FlowSpace.Api"]
