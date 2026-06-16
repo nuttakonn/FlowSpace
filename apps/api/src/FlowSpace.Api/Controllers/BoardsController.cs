@@ -65,6 +65,19 @@ public class BoardsController : ApiController
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
 
+    [HttpGet("/api/v1/boards/{id:guid}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetById(Guid id, [FromQuery] string? token)
+    {
+        if (!await HasPermission(id, Permissions.NodeRead, token))
+            return Unauthorized();
+
+        var query = new FlowSpace.Application.Boards.Queries.GetBoardById.GetBoardByIdQuery(id);
+        var result = await _sender.Send(query);
+
+        return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
+    }
+
     [HttpGet("{id:guid}/whiteboard")]
     [AllowAnonymous]
     public async Task<IActionResult> GetWhiteboard(Guid workspaceId, Guid id, [FromQuery] string? token)
