@@ -32,7 +32,6 @@ interface Board {
 
 export default function HomePage() {
   const { user, isAuthenticated } = useAuthStore();
-  const router = useRouter();
   
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [recentBoards, setRecentBoards] = useState<Board[]>([]);
@@ -229,6 +228,27 @@ export default function HomePage() {
                  <p className="text-[10px] mt-1 font-medium italic">Coming Soon</p>
               </div>
            </Card>
+
+           <Card className="border-2 border-dashed border-muted flex items-center justify-center p-6 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all cursor-not-allowed">
+              <div className="text-center">
+                 <Settings className="h-6 w-6 mx-auto mb-2 text-primary" />
+                 <p className="text-xs font-black uppercase tracking-widest">Settings</p>
+                 <p className="text-[10px] mt-1 font-medium italic">Coming Soon</p>
+              </div>
+           </Card>
+        </div>
+      </main>
+
+      <footer className="border-t py-6 mt-12 bg-muted/10">
+        <div className="container mx-auto px-6 flex justify-between items-center">
+           <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">FlowSpace Personal / Team Edition</p>
+           <p className="text-[10px] font-medium text-muted-foreground">© 2026</p>
+        </div>
+      </footer>
+    </div>
+  );
+}
+    </Card>
 
            <Card className="border-2 border-dashed border-muted flex items-center justify-center p-6 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all cursor-not-allowed">
               <div className="text-center">
