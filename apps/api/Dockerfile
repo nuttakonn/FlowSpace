@@ -2,18 +2,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy the entire solution
+# Copy the entire monorepo to handle project-to-project references
 COPY . .
 
-# Restore dependencies
-WORKDIR /src/src/FlowSpace.Api
-RUN dotnet restore
+# Restore dependencies using the solution file
+# Context is repository root, so path is apps/api/FlowSpace.slnx
+RUN dotnet restore "apps/api/FlowSpace.slnx"
 
 # Build and publish the API project
-RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
+# Path is apps/api/src/FlowSpace.Api
+WORKDIR "/src/apps/api/src/FlowSpace.Api"
+RUN dotnet publish "FlowSpace.Api.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Use the official Playwright .NET image as the runtime base 
-# This includes all necessary browser dependencies (Chromium, WebKit, Firefox) required by the ExportWorker
 FROM mcr.microsoft.com/playwright/dotnet:v1.44.0-jammy AS runtime
 WORKDIR /app
 
