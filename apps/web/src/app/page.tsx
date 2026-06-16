@@ -31,17 +31,22 @@ interface Board {
 }
 
 export default function HomePage() {
-  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const router = useRouter();
   
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [recentBoards, setRecentBoards] = useState<Board[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
-      // For a non-SaaS, team tool, we can either show a clean login 
-      // or redirect. Let's redirect to login if not authenticated.
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    if (!isAuthenticated) {
       router.push("/login");
       return;
     }
@@ -49,7 +54,7 @@ export default function HomePage() {
     if (isAuthenticated) {
       fetchDashboardData();
     }
-  }, [isAuthenticated, isAuthLoading, router]);
+  }, [isAuthenticated, isMounted, router]);
 
   const fetchDashboardData = async () => {
     try {
@@ -69,7 +74,7 @@ export default function HomePage() {
     }
   };
 
-  if (isAuthLoading || (isAuthenticated && isLoading)) {
+  if (!isMounted || (isAuthenticated && isLoading)) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
