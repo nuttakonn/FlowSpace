@@ -505,7 +505,3 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     }
   };
 });
-load: persistentRecords });
-    }
-  };
-});
