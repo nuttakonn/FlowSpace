@@ -63,7 +63,7 @@ export default function BoardEditorPage() {
     return (
       <div className="flex h-screen flex-col items-center justify-center text-center">
         <h2 className="text-2xl font-bold tracking-tight">Board not found</h2>
-        <Link href="/dashboard" className="mt-4 text-primary hover:underline">Return to Dashboard</Link>
+        <Link href="/" className="mt-4 text-primary hover:underline">Return to Home</Link>
       </div>
     );
   }
