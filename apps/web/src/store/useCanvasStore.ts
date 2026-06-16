@@ -165,7 +165,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       }
 
       connection.start().then(() => {
-        connection.invoke('JoinBoard', boardId, token);
+        connection.invoke('JoinBoard', boardId, token || null);
         connection.invoke('SendAwareness', boardId, new TextEncoder().encode(JSON.stringify({ clientId: connection.connectionId, userState: { id: userId, name: userName, color: userColor, selection: [], lastActive: Date.now() } })));
       }).catch(() => toast.error('Failed to connect to real-time engine'));
     },
@@ -502,6 +502,10 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         if (!id.startsWith('user_presence:')) persistentRecords[id] = record;
       });
       if (Object.keys(persistentRecords).length > 0) get().enqueueMutation({ type: 'UPDATE_WHITEBOARD', payload: persistentRecords });
+    }
+  };
+});
+load: persistentRecords });
     }
   };
 });

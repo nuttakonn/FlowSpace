@@ -17,16 +17,38 @@ namespace FlowSpace.Api.Controllers;
 public class DiagramsController : ApiController
 {
     private readonly ISender _sender;
+    private readonly IPermissionService _permissionService;
 
-    public DiagramsController(ISender sender)
+    public DiagramsController(ISender sender, IPermissionService permissionService)
     {
         _sender = sender;
+        _permissionService = permissionService;
+    }
+
+    private async Task<bool> HasPermission(Guid boardId, string permission, string? token)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userIdString != null && Guid.TryParse(userIdString, out var userId))
+        {
+            if (await _permissionService.HasPermissionAsync(userId, permission, boardId))
+                return true;
+        }
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            return await _permissionService.HasPermissionAsync(token, permission, boardId);
+        }
+
+        return false;
     }
 
     [HttpGet]
-    [Authorize(Policy = Permissions.NodeRead)]
-    public async Task<IActionResult> GetElements(Guid boardId, [FromQuery] double? x, [FromQuery] double? y, [FromQuery] double? width, [FromQuery] double? height)
+    [AllowAnonymous]
+    public async Task<IActionResult> GetElements(Guid boardId, [FromQuery] string? token, [FromQuery] double? x, [FromQuery] double? y, [FromQuery] double? width, [FromQuery] double? height)
     {
+        if (!await HasPermission(boardId, Permissions.NodeRead, token))
+            return Unauthorized();
+
         var query = new GetElementsQuery(boardId, x, y, width, height);
         var result = await _sender.Send(query);
 
@@ -34,9 +56,12 @@ public class DiagramsController : ApiController
     }
 
     [HttpPost("nodes")]
-    [Authorize(Policy = Permissions.NodeCreate)]
-    public async Task<IActionResult> CreateNode(Guid boardId, CreateNodeRequest request)
+    [AllowAnonymous]
+    public async Task<IActionResult> CreateNode(Guid boardId, [FromQuery] string? token, CreateNodeRequest request)
     {
+        if (!await HasPermission(boardId, Permissions.NodeCreate, token))
+            return Unauthorized();
+
         var command = new CreateNodeCommand(
             boardId,
             request.Type,
@@ -52,9 +77,12 @@ public class DiagramsController : ApiController
     }
 
     [HttpPut("nodes/{id:guid}")]
-    [Authorize(Policy = Permissions.NodeUpdate)]
-    public async Task<IActionResult> UpdateNode(Guid boardId, Guid id, UpdateNodeRequest request)
+    [AllowAnonymous]
+    public async Task<IActionResult> UpdateNode(Guid boardId, Guid id, [FromQuery] string? token, UpdateNodeRequest request)
     {
+        if (!await HasPermission(boardId, Permissions.NodeUpdate, token))
+            return Unauthorized();
+
         var command = new UpdateNodeCommand(
             id,
             request.X,
@@ -69,9 +97,12 @@ public class DiagramsController : ApiController
     }
 
     [HttpDelete("nodes/{id:guid}")]
-    [Authorize(Policy = Permissions.NodeDelete)]
-    public async Task<IActionResult> DeleteNode(Guid boardId, Guid id)
+    [AllowAnonymous]
+    public async Task<IActionResult> DeleteNode(Guid boardId, Guid id, [FromQuery] string? token)
     {
+        if (!await HasPermission(boardId, Permissions.NodeDelete, token))
+            return Unauthorized();
+
         var command = new DeleteNodeCommand(id);
         var result = await _sender.Send(command);
 
@@ -79,9 +110,12 @@ public class DiagramsController : ApiController
     }
 
     [HttpPost("edges")]
-    [Authorize(Policy = Permissions.NodeCreate)] // Re-using NodeCreate for edges for now
-    public async Task<IActionResult> CreateEdge(Guid boardId, CreateEdgeRequest request)
+    [AllowAnonymous]
+    public async Task<IActionResult> CreateEdge(Guid boardId, [FromQuery] string? token, CreateEdgeRequest request)
     {
+        if (!await HasPermission(boardId, Permissions.NodeCreate, token))
+            return Unauthorized();
+
         var command = new CreateEdgeCommand(
             boardId,
             request.SourceNodeId,
@@ -94,9 +128,12 @@ public class DiagramsController : ApiController
     }
 
     [HttpDelete("edges/{id:guid}")]
-    [Authorize(Policy = Permissions.NodeDelete)]
-    public async Task<IActionResult> DeleteEdge(Guid boardId, Guid id)
+    [AllowAnonymous]
+    public async Task<IActionResult> DeleteEdge(Guid boardId, Guid id, [FromQuery] string? token)
     {
+        if (!await HasPermission(boardId, Permissions.NodeDelete, token))
+            return Unauthorized();
+
         var command = new DeleteEdgeCommand(id);
         var result = await _sender.Send(command);
 

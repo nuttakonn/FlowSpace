@@ -44,6 +44,8 @@ public class CollaborationHub : Hub
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, boardId.ToString());
             Context.Items["CanUpdate"] = canUpdate;
+            Context.Items["BoardId"] = boardId;
+            Context.Items["Token"] = token;
             await Clients.Caller.SendAsync("OnJoined", boardId);
         }
         else

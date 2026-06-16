@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Globe, Lock, ShieldCheck } from "lucide-react";
+import { Globe, Lock, ShieldCheck, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { FlowchartCanvas } from "@/components/canvas/FlowchartCanvas";
 import { WhiteboardCanvas } from "@/components/canvas/WhiteboardCanvas";
+import { Badge } from "@/components/ui/badge";
 
 interface Board {
   id: string;
@@ -55,12 +55,14 @@ export default function SharedBoardPage() {
         </div>
         <h2 className="text-2xl font-bold tracking-tight">Access Denied</h2>
         <p className="text-muted-foreground mt-2 max-w-md">{error}</p>
-        <Button variant="outline" className="mt-8" onClick={() => window.location.href = "/dashboard"}>
+        <Button variant="outline" className="mt-8" onClick={() => window.location.href = "/"}>
           Return Home
         </Button>
       </div>
     );
   }
+
+  const guestId = `guest-${Math.random().toString(36).substring(2, 9)}`;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -76,22 +78,32 @@ export default function SharedBoardPage() {
         </div>
         <div className="flex items-center gap-2">
            <Badge variant="outline" className="text-[9px] font-black uppercase flex items-center gap-1">
-             <ShieldCheck className="h-3 w-3" /> View Only
+             <ShieldCheck className="h-3 w-3" /> Collaborative Session
            </Badge>
         </div>
       </header>
 
       <main className="flex-1 relative overflow-hidden">
-        {/* Note: In shared mode, we don't have a user, so we pass "Guest" and the token */}
         {board.type === "Whiteboard" ? (
-          <WhiteboardCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken="" userName="Guest" userId="00000000-0000-0000-0000-000000000000" token={token} />
+          <WhiteboardCanvas 
+            boardId={board.id} 
+            workspaceId={board.workspaceId} 
+            accessToken="" 
+            userName="Guest" 
+            userId={guestId} 
+            token={token} 
+          />
         ) : (
-          <FlowchartCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken="" userName="Guest" userId="00000000-0000-0000-0000-000000000000" token={token} />
+          <FlowchartCanvas 
+            boardId={board.id} 
+            workspaceId={board.workspaceId} 
+            accessToken="" 
+            userName="Guest" 
+            userId={guestId} 
+            token={token} 
+          />
         )}
       </main>
     </div>
   );
 }
-
-import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";

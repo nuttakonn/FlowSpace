@@ -18,10 +18,29 @@ namespace FlowSpace.Api.Controllers;
 public class BoardsController : ApiController
 {
     private readonly ISender _sender;
+    private readonly IPermissionService _permissionService;
 
-    public BoardsController(ISender sender)
+    public BoardsController(ISender sender, IPermissionService permissionService)
     {
         _sender = sender;
+        _permissionService = permissionService;
+    }
+
+    private async Task<bool> HasPermission(Guid boardId, string permission, string? token)
+    {
+        var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userIdString != null && Guid.TryParse(userIdString, out var userId))
+        {
+            if (await _permissionService.HasPermissionAsync(userId, permission, boardId))
+                return true;
+        }
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            return await _permissionService.HasPermissionAsync(token, permission, boardId);
+        }
+
+        return false;
     }
 
     [HttpPost]
@@ -46,9 +65,12 @@ public class BoardsController : ApiController
     }
 
     [HttpGet("{id:guid}/whiteboard")]
-    [Authorize(Policy = Permissions.NodeRead)]
-    public async Task<IActionResult> GetWhiteboard(Guid workspaceId, Guid id)
+    [AllowAnonymous]
+    public async Task<IActionResult> GetWhiteboard(Guid workspaceId, Guid id, [FromQuery] string? token)
     {
+        if (!await HasPermission(id, Permissions.NodeRead, token))
+            return Unauthorized();
+
         var query = new GetWhiteboardQuery(id);
         var result = await _sender.Send(query);
 
@@ -76,9 +98,12 @@ public class BoardsController : ApiController
     }
 
     [HttpPut("{id:guid}/whiteboard")]
-    [Authorize(Policy = Permissions.BoardUpdate)]
-    public async Task<IActionResult> UpdateWhiteboard(Guid id, [FromBody] Dictionary<string, object> records)
+    [AllowAnonymous]
+    public async Task<IActionResult> UpdateWhiteboard(Guid workspaceId, Guid id, [FromQuery] string? token, [FromBody] Dictionary<string, object> records)
     {
+        if (!await HasPermission(id, Permissions.BoardUpdate, token))
+            return Unauthorized();
+
         var command = new UpdateWhiteboardCommand(id, records);
         var result = await _sender.Send(command);
 
