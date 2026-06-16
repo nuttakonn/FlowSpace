@@ -144,9 +144,10 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const yWhiteboard = yDoc.getMap('whiteboard');
       
       const connection = new signalR.HubConnectionBuilder()
-        .withUrl(`${process.env.NEXT_PUBLIC_HUB_URL || 'http://localhost:5000/hubs/collaboration'}`, { 
-          accessTokenFactory: () => accessToken 
-        })
+       .withUrl(`${process.env.NEXT_PUBLIC_HUB_URL || 'http://localhost:8080/hubs/collaboration'}`, {
+         accessTokenFactory: () => accessToken
+       })
+
         .withHubProtocol(new MessagePackHubProtocol()).withAutomaticReconnect().build();
       const userColor = USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
 

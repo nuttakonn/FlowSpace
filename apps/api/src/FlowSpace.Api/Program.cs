@@ -79,6 +79,14 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()
             .AllowCredentials();
     });
+
+    options.AddPolicy("DevCorsPolicy", policy =>
+    {
+        policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost" || new Uri(origin).Host == "127.0.0.1")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
 // Register SignalR
@@ -133,6 +141,10 @@ if (app.Environment.IsDevelopment())
 if (app.Environment.IsProduction() || app.Environment.EnvironmentName == "Cloud")
 {
     app.UseCors("CloudCorsPolicy");
+}
+else
+{
+    app.UseCors("DevCorsPolicy");
 }
 
 app.UseRateLimiter();
