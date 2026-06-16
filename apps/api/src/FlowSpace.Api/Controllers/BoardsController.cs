@@ -78,9 +78,9 @@ public class BoardsController : ApiController
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
 
-    [HttpGet("{id:guid}/whiteboard")]
+    [HttpGet("/api/v1/boards/{id:guid}/whiteboard")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetWhiteboard(Guid workspaceId, Guid id, [FromQuery] string? token)
+    public async Task<IActionResult> GetWhiteboard(Guid id, [FromQuery] string? token)
     {
         if (!await HasPermission(id, Permissions.NodeRead, token))
             return Unauthorized();
@@ -91,7 +91,7 @@ public class BoardsController : ApiController
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPut("/api/v1/boards/{id:guid}")]
     [Authorize(Policy = Permissions.BoardUpdate)]
     public async Task<IActionResult> Update(Guid id, UpdateBoardRequest request)
     {
@@ -101,7 +101,7 @@ public class BoardsController : ApiController
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("/api/v1/boards/{id:guid}")]
     [Authorize(Policy = Permissions.BoardDelete)]
     public async Task<IActionResult> Delete(Guid id)
     {
@@ -111,9 +111,9 @@ public class BoardsController : ApiController
         return result.IsSuccess ? NoContent() : HandleFailure(result);
     }
 
-    [HttpPut("{id:guid}/whiteboard")]
+    [HttpPut("/api/v1/boards/{id:guid}/whiteboard")]
     [AllowAnonymous]
-    public async Task<IActionResult> UpdateWhiteboard(Guid workspaceId, Guid id, [FromQuery] string? token, [FromBody] Dictionary<string, object> records)
+    public async Task<IActionResult> UpdateWhiteboard(Guid id, [FromQuery] string? token, [FromBody] Dictionary<string, object> records)
     {
         if (!await HasPermission(id, Permissions.BoardUpdate, token))
             return Unauthorized();

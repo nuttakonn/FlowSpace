@@ -271,7 +271,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
                 break;
               }
               case 'UPDATE_WHITEBOARD': {
-                await apiClient.put(`/workspaces/${state.workspaceId}/boards/${state.boardId}/whiteboard`, mutation.payload);
+                await apiClient.put(`/boards/${state.boardId}/whiteboard`, mutation.payload);
                 break;
               }
             }

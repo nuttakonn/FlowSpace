@@ -29,14 +29,25 @@ export default function BoardEditorPage() {
 
   const [board, setBoard] = useState<Board | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBoard = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
         const response = await apiClient.get<Board>(`/boards/${boardId}`);
         setBoard(response.data);
       } catch (err: unknown) {
         console.error("Failed to load board", err);
+        const error = err as { response?: { status?: number } };
+        if (error.response?.status === 401) {
+          setError("Unauthorized: You don't have permission to view this board.");
+        } else if (error.response?.status === 404 || error.response?.status === 400) {
+          setError("Board not found.");
+        } else {
+          setError("An unexpected error occurred while loading the board.");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -59,14 +70,17 @@ export default function BoardEditorPage() {
     );
   }
 
-  if (!board || !accessToken || !user) {
+  // Allow rendering if board is fetched, even if not logged in (to support share tokens)
+  if (!board) {
     return (
       <div className="flex h-screen flex-col items-center justify-center text-center">
-        <h2 className="text-2xl font-bold tracking-tight">Board not found</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{error || "Board not found"}</h2>
         <Link href="/" className="mt-4 text-primary hover:underline">Return to Home</Link>
       </div>
     );
   }
+
+  const shareToken = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('token') || undefined : undefined;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -93,9 +107,23 @@ export default function BoardEditorPage() {
       <main className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0">
           {board.type === "Whiteboard" ? (
-            <WhiteboardCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken={accessToken} userName={user.displayName} userId={user.id} />
+            <WhiteboardCanvas 
+              boardId={board.id} 
+              workspaceId={board.workspaceId} 
+              accessToken={accessToken || ""} 
+              userName={user?.displayName || "Guest"} 
+              userId={user?.id || "guest"} 
+              token={shareToken}
+            />
           ) : (
-            <FlowchartCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken={accessToken} userName={user.displayName} userId={user.id} />
+            <FlowchartCanvas 
+              boardId={board.id} 
+              workspaceId={board.workspaceId} 
+              accessToken={accessToken || ""} 
+              userName={user?.displayName || "Guest"} 
+              userId={user?.id || "guest"} 
+              token={shareToken}
+            />
           )}
         </div>
       </main>

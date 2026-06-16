@@ -130,9 +130,11 @@ public class PermissionService : IPermissionService
 
         var link = await _dbContext.BoardShareLinks
             .AsNoTracking()
+            .Include(l => l.Board)
             .FirstOrDefaultAsync(l => l.Token == token && l.BoardId == boardId);
 
-        if (link == null || !link.IsValid()) return false;
+        // If link is null, or board is null (which happens if it's soft-deleted due to Global Query Filter), return false
+        if (link == null || link.Board == null || !link.IsValid()) return false;
 
         return Permissions.GetForRole(link.Role).Contains(permission);
     }
