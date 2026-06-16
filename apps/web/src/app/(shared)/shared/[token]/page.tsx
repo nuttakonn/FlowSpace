@@ -84,25 +84,27 @@ export default function SharedBoardPage() {
       </header>
 
       <main className="flex-1 relative overflow-hidden">
-        {board.type === "Whiteboard" ? (
-          <WhiteboardCanvas 
-            boardId={board.id} 
-            workspaceId={board.workspaceId} 
-            accessToken="" 
-            userName="Guest" 
-            userId={guestId} 
-            token={token} 
-          />
-        ) : (
-          <FlowchartCanvas 
-            boardId={board.id} 
-            workspaceId={board.workspaceId} 
-            accessToken="" 
-            userName="Guest" 
-            userId={guestId} 
-            token={token} 
-          />
-        )}
+        <div className="absolute inset-0">
+          {board.type === "Whiteboard" ? (
+            <WhiteboardCanvas 
+              boardId={board.id} 
+              workspaceId={board.workspaceId} 
+              accessToken="" 
+              userName="Guest" 
+              userId={guestId} 
+              token={token} 
+            />
+          ) : (
+            <FlowchartCanvas 
+              boardId={board.id} 
+              workspaceId={board.workspaceId} 
+              accessToken="" 
+              userName="Guest" 
+              userId={guestId} 
+              token={token} 
+            />
+          )}
+        </div>
       </main>
     </div>
   );

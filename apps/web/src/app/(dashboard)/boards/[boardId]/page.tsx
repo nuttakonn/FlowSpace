@@ -91,11 +91,13 @@ export default function BoardEditorPage() {
       </header>
 
       <main className="flex-1 relative overflow-hidden">
-        {board.type === "Whiteboard" ? (
-          <WhiteboardCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken={accessToken} userName={user.displayName} userId={user.id} />
-        ) : (
-          <FlowchartCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken={accessToken} userName={user.displayName} userId={user.id} />
-        )}
+        <div className="absolute inset-0">
+          {board.type === "Whiteboard" ? (
+            <WhiteboardCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken={accessToken} userName={user.displayName} userId={user.id} />
+          ) : (
+            <FlowchartCanvas boardId={board.id} workspaceId={board.workspaceId} accessToken={accessToken} userName={user.displayName} userId={user.id} />
+          )}
+        </div>
       </main>
     </div>
   );
