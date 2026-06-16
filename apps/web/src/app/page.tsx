@@ -45,14 +45,43 @@ export default function HomePage() {
     if (!isMounted) return;
 
     if (!isAuthenticated) {
-      router.push("/login");
+      // Shadow Authentication Flow
+      const setupShadowAccount = async () => {
+        try {
+          setIsLoading(true);
+          const shadowId = Math.random().toString(36).substring(2, 10);
+          const shadowEmail = `guest-${shadowId}@flowspace.local`;
+          const shadowPassword = `Shadow!${shadowId}Secure2026`;
+
+          const response = await apiClient.post("/auth/register", {
+            email: shadowEmail,
+            password: shadowPassword,
+            displayName: "Guest Creator",
+          });
+
+          useAuthStore.getState().setAuth(
+            response.data.user,
+            response.data.accessToken,
+            response.data.refreshToken
+          );
+          
+          fetchDashboardData();
+        } catch (error) {
+          console.error("Failed to setup shadow account", error);
+          toast.error("Failed to initialize session.");
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      setupShadowAccount();
       return;
     }
 
     if (isAuthenticated) {
       fetchDashboardData();
     }
-  }, [isAuthenticated, isMounted, router]);
+  }, [isAuthenticated, isMounted]);
 
   const fetchDashboardData = async () => {
     try {
