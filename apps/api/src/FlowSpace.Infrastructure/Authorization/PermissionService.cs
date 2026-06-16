@@ -121,6 +121,9 @@ public class PermissionService : IPermissionService
             return Permissions.GetForRole(role.Value).Contains(permission);
         }
 
+        return false;
+    }
+
     public async Task<bool> HasPermissionAsync(string token, string permission, Guid boardId)
     {
         if (string.IsNullOrEmpty(token)) return false;
