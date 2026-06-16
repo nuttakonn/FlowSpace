@@ -3,7 +3,7 @@ import axiosRetry from 'axios-retry';
 import { useAuthStore } from '@/store/useAuthStore';
 import { AuthResponse } from '@/types/auth';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://flowspace-api-1kor.onrender.com/api/v1';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

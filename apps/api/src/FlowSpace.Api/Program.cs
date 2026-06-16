@@ -75,6 +75,7 @@ builder.Services.AddCors(options =>
     {
         var allowedOrigins = builder.Configuration.GetValue<string>("AllowedOrigins")?.Split(',') ?? Array.Empty<string>();
         policy.WithOrigins(allowedOrigins)
+            .SetIsOriginAllowedToAllowWildcardSubdomains()
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -82,7 +83,7 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("DevCorsPolicy", policy =>
     {
-        policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost" || new Uri(origin).Host == "127.0.0.1")
+        policy.WithOrigins("http://localhost:3000", "http://127.0.0.1:3000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
