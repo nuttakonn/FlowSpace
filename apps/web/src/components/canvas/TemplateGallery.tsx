@@ -74,18 +74,18 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1200px] w-[95vw] h-[90vh] md:h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-[1200px] w-[95vw] h-[90vh] flex flex-col p-0 gap-0 overflow-hidden bg-background">
         <DialogTitle className="sr-only">Choose a template</DialogTitle>
         <DialogDescription className="sr-only">Select a template to kickstart your workflow.</DialogDescription>
-        <div className="flex flex-col md:flex-row h-full min-h-0 overflow-hidden">
+        <div className="flex flex-col lg:flex-row h-full min-h-0 overflow-hidden">
           {/* Sidebar */}
-          <aside className="w-full md:w-64 lg:w-72 border-b md:border-b-0 md:border-r bg-muted/20 flex flex-col flex-shrink-0 max-h-[40vh] md:max-h-none">
-            <div className="p-4 md:p-6 pb-2 hidden md:block">
+          <aside className="w-full lg:w-72 border-b lg:border-b-0 lg:border-r bg-muted/10 flex flex-col flex-shrink-0 z-10">
+            <div className="p-4 lg:p-6 pb-2 hidden lg:block">
               <h2 className="text-xl font-bold tracking-tight">FlowSpace</h2>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-1">Template Library</p>
             </div>
             
-            <div className="p-4 md:pt-2">
+            <div className="p-4 lg:pt-2">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
@@ -97,20 +97,20 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
               </div>
             </div>
 
-            <ScrollArea className="flex-1 px-4 md:block">
-              <div className="flex md:flex-col gap-2 md:gap-1 py-2 overflow-x-auto pb-4 md:pb-2">
-                <p className="hidden md:block px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-2">Categories</p>
+            <ScrollArea className="flex-none lg:flex-1 px-4">
+              <div className="flex flex-row lg:flex-col gap-2 py-2 overflow-x-auto pb-4 lg:pb-2 scrollbar-hide">
+                <p className="hidden lg:block px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-2">Categories</p>
                 {CATEGORIES.map(cat => (
                   <Button
                     key={cat}
                     variant={selectedCategory === cat ? "secondary" : "ghost"}
                     className={cn(
-                      "flex-shrink-0 md:w-full justify-start h-10 px-3 md:px-2 gap-2 md:gap-3 transition-colors rounded-full md:rounded-md whitespace-nowrap border md:border-transparent",
-                      selectedCategory === cat ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/20" : "border-border"
+                      "flex-shrink-0 lg:w-full justify-start h-10 px-4 lg:px-3 gap-3 transition-colors rounded-full lg:rounded-md whitespace-nowrap border lg:border-transparent",
+                      selectedCategory === cat ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/20 shadow-sm" : "border-border/50 bg-background lg:bg-transparent"
                     )}
                     onClick={() => setSelectedCategory(cat)}
                   >
-                    <span className="hidden md:inline-flex">
+                    <span className="hidden lg:inline-flex">
                       {cat === 'All' && <Layout className="h-4 w-4" />}
                       {cat === 'Whiteboarding' && <Layers className="h-4 w-4" />}
                       {cat === 'Diagrams' && <Workflow className="h-4 w-4" />}
@@ -123,7 +123,7 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
               </div>
             </ScrollArea>
 
-            <div className="p-4 border-t bg-muted/10 hidden md:block">
+            <div className="p-4 border-t bg-muted/10 hidden lg:block">
               <Button variant="ghost" className="w-full justify-start gap-3 h-10 text-muted-foreground" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
@@ -131,16 +131,16 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
           </aside>
 
           {/* Main Gallery */}
-          <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
-            <div className="p-4 md:p-8 pb-2 md:pb-4 flex-shrink-0">
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight">Choose a template</h1>
-              <p className="text-sm md:text-base text-muted-foreground">Kickstart your workflow with a pre-built canvas.</p>
+          <main className="flex-1 flex flex-col min-w-0 bg-muted/5 overflow-hidden relative">
+            <div className="p-6 lg:p-8 pb-4 flex-shrink-0 bg-background/50 backdrop-blur sticky top-0 z-10 border-b lg:border-none">
+              <h1 className="text-xl lg:text-3xl font-extrabold tracking-tight text-foreground">Choose a template</h1>
+              <p className="text-sm text-muted-foreground mt-1">Kickstart your workflow with a pre-built canvas.</p>
             </div>
 
-            <ScrollArea className="flex-1 px-4 md:px-8 py-2 md:py-4">
+            <ScrollArea className="flex-1 px-6 lg:px-8 py-4">
               <motion.div 
                 layout
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pb-4 md:pb-8 min-w-0"
+                className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 pb-8"
               >
                 <AnimatePresence>
                   {filteredTemplates.map((template) => (
