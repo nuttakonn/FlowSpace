@@ -368,7 +368,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const { yNodes } = get();
       get().commitHistory();
       const tempId = `temp-${uuidv4()}`;
-      const tempNode: Node = { id: tempId, type: 'default', position, data: { label: 'New Node' } };
+      const tempNode: Node = { id: tempId, type: type.toLowerCase(), position, data: { label: `New ${type}` } };
       yNodes.set(tempId, tempNode);
       get().enqueueMutation({ type: 'CREATE_NODE', tempId, payload: { type, x: position.x, y: position.y, metadata: JSON.stringify(tempNode.data) } });
     },

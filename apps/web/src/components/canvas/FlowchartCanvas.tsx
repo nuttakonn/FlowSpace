@@ -22,6 +22,14 @@ import { RemoteCursors } from "./RemoteCursors";
 import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
 import { AiSidePanel } from "./AiSidePanel";
+import { DiamondNode, CircleNode, DatabaseNode, CloudNode } from "./nodes/CustomNodes";
+
+const nodeTypes = {
+  diamond: DiamondNode,
+  circle: CircleNode,
+  database: DatabaseNode,
+  cloud: CloudNode
+};
 
 interface FlowchartCanvasProps {
   boardId: string;
@@ -157,6 +165,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
       <ReactFlow
         nodes={visibleNodes}
         edges={visibleEdges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
