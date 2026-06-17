@@ -74,10 +74,10 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-[1200px] w-[90vw] h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
         <div className="flex h-full min-h-0 overflow-hidden">
           {/* Sidebar */}
-          <aside className="w-64 border-r bg-muted/20 flex flex-col flex-shrink-0">
+          <aside className="w-64 lg:w-72 border-r bg-muted/20 flex flex-col flex-shrink-0">
             <div className="p-6 pb-2">
               <h2 className="text-xl font-bold tracking-tight">FlowSpace</h2>
               <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-1">Template Library</p>
@@ -136,7 +136,7 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
             <ScrollArea className="flex-1 px-8 py-4">
               <motion.div 
                 layout
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 pb-8"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-8 min-w-0"
               >
                 <AnimatePresence>
                   {filteredTemplates.map((template) => (
@@ -156,12 +156,12 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
                           setBoardName(prev => prev || template.name);
                       }}
                     >
-                      <div className={cn("aspect-video w-full rounded-t-xl flex items-center justify-center relative overflow-hidden", template.previewColor)}>
+                      <div className={cn("aspect-video w-full rounded-t-xl flex items-center justify-center relative overflow-hidden flex-shrink-0", template.previewColor)}>
                           <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <template.icon className="h-16 w-12 text-white/90 drop-shadow-2xl scale-125" />
+                          <template.icon className="h-12 w-12 text-white/90 drop-shadow-lg" />
                       </div>
-                      <div className="p-5">
-                          <h3 className="font-bold text-base leading-none mb-2">{template.name}</h3>
+                      <div className="p-5 flex-1 bg-card rounded-b-xl">
+                          <h3 className="font-bold text-base leading-none mb-2 text-foreground">{template.name}</h3>
                           <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{template.description}</p>
                       </div>
                       {selectedTemplate?.id === template.id && (

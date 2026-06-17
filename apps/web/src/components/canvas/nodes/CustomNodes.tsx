@@ -38,6 +38,8 @@ interface CustomNodeData {
   iconComponent?: any;
   color?: string;
   sublabel?: string;
+  width?: number;
+  height?: number;
 }
 
 const NodeLabelInput = ({ id, label, className }: { id: string; label?: string; className?: string }) => {
@@ -74,8 +76,9 @@ const NodeLabelInput = ({ id, label, className }: { id: string; label?: string; 
 
 export const RectangleNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group flex h-full w-full items-center justify-center rounded-xl border-2 border-primary bg-background px-4 py-2 text-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div style={style} className={`group flex h-full w-full items-center justify-center rounded-xl border-2 border-primary bg-background px-4 py-2 text-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <NodeResizer minWidth={80} minHeight={40} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <NodeLabelInput id={id} label={nodeData.label} />
@@ -89,8 +92,9 @@ export const RectangleNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const DiamondNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group relative flex h-full w-full items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div style={style} className={`group relative flex h-full w-full items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <NodeResizer minWidth={100} minHeight={100} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div 
@@ -112,8 +116,9 @@ export const DiamondNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const CircleNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group flex h-full w-full items-center justify-center rounded-full border-2 border-primary bg-background p-4 text-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div style={style} className={`group flex h-full w-full items-center justify-center rounded-full border-2 border-primary bg-background p-4 text-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <NodeResizer minWidth={60} minHeight={60} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <NodeLabelInput id={id} label={nodeData.label} />
@@ -125,8 +130,9 @@ export const CircleNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const DatabaseNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group relative flex h-full w-full flex-col items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div style={style} className={`group relative flex h-full w-full flex-col items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <NodeResizer minWidth={60} minHeight={80} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div className="absolute top-0 h-4 w-full rounded-[50%] border-2 border-primary bg-background z-10" />
@@ -142,8 +148,9 @@ export const DatabaseNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const CloudNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group relative flex h-full w-full items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div style={style} className={`group relative flex h-full w-full items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <NodeResizer minWidth={120} minHeight={80} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div className="absolute inset-0 bg-background border-2 border-primary rounded-[40%] flex items-center justify-center overflow-hidden">
@@ -163,8 +170,9 @@ export const CloudNode = memo(({ id, data, selected }: NodeProps) => {
 export const InfrastructureNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as any;
   const Icon = nodeData.iconComponent;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group flex flex-col items-center justify-center h-full w-full p-4 rounded-2xl border-2 bg-background transition-all ${selected ? 'border-primary ring-2 ring-primary/20 shadow-xl scale-[1.02]' : 'border-border shadow-sm'}`}>
+    <div style={style} className={`group flex flex-col items-center justify-center h-full w-full p-4 rounded-2xl border-2 bg-background transition-all ${selected ? 'border-primary ring-2 ring-primary/20 shadow-xl scale-[1.02]' : 'border-border shadow-sm'}`}>
        <NodeResizer minWidth={120} minHeight={120} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
        <SelectionToolbar isVisible={selected} nodeId={id} />
        <div className={cn("p-4 rounded-xl mb-3 shadow-inner transition-colors", nodeData.color || "bg-primary/10 text-primary")}>
@@ -184,8 +192,9 @@ export const InfrastructureNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const ClientNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group flex flex-col items-center justify-center h-full w-full p-4 transition-all ${selected ? 'ring-2 ring-primary ring-offset-2 rounded-xl bg-primary/5' : ''}`}>
+    <div style={style} className={`group flex flex-col items-center justify-center h-full w-full p-4 transition-all ${selected ? 'ring-2 ring-primary ring-offset-2 rounded-xl bg-primary/5' : ''}`}>
        <NodeResizer minWidth={100} minHeight={100} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
        <SelectionToolbar isVisible={selected} nodeId={id} />
        <div className="p-4 rounded-full bg-primary/10 text-primary mb-2">
@@ -200,8 +209,9 @@ export const ClientNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const MobileNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group flex flex-col items-center justify-center h-full w-full p-4 rounded-[2rem] border-[3px] border-primary bg-background shadow-xl transition-all ${selected ? 'ring-4 ring-primary/20' : ''}`}>
+    <div style={style} className={`group flex flex-col items-center justify-center h-full w-full p-4 rounded-[2rem] border-[3px] border-primary bg-background shadow-xl transition-all ${selected ? 'ring-4 ring-primary/20' : ''}`}>
        <NodeResizer minWidth={80} minHeight={140} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
        <SelectionToolbar isVisible={selected} nodeId={id} />
        <div className="w-12 h-1 bg-primary/20 rounded-full mb-6 mt-1" />
@@ -217,8 +227,9 @@ export const MobileNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const BrowserNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group flex flex-col h-full w-full rounded-xl border-2 border-primary bg-background shadow-2xl overflow-hidden transition-all ${selected ? 'ring-4 ring-primary/20' : ''}`}>
+    <div style={style} className={`group flex flex-col h-full w-full rounded-xl border-2 border-primary bg-background shadow-2xl overflow-hidden transition-all ${selected ? 'ring-4 ring-primary/20' : ''}`}>
       <NodeResizer minWidth={300} minHeight={200} isVisible={selected} lineClassName="border-primary" handleClassName="h-4 w-4 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div className="h-8 border-b-2 border-primary bg-muted flex items-center px-3 gap-1.5 flex-shrink-0">
@@ -244,8 +255,9 @@ export const BrowserNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const StickyNoteNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group relative flex h-full w-full flex-col items-center justify-center bg-yellow-50 border-2 border-yellow-200/50 shadow-xl p-8 text-center transition-all ${selected ? 'ring-4 ring-yellow-400/30' : ''}`}>
+    <div style={style} className={`group relative flex h-full w-full flex-col items-center justify-center bg-yellow-50 border-2 border-yellow-200/50 shadow-xl p-8 text-center transition-all ${selected ? 'ring-4 ring-yellow-400/30' : ''}`}>
       <NodeResizer minWidth={150} minHeight={150} isVisible={selected} lineClassName="border-yellow-400" handleClassName="h-3 w-3 bg-white border-2 border-yellow-400 rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <NodeLabelInput id={id} label={nodeData.label} className="text-base font-semibold text-yellow-900" />
@@ -258,8 +270,9 @@ export const StickyNoteNode = memo(({ id, data, selected }: NodeProps) => {
 
 export const TextNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group p-4 min-w-[120px] h-full w-full flex items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2 rounded-lg bg-primary/5' : ''}`}>
+    <div style={style} className={`group p-4 min-w-[120px] h-full w-full flex items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2 rounded-lg bg-primary/5' : ''}`}>
       <NodeResizer minWidth={100} minHeight={40} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-medium" />
@@ -272,8 +285,9 @@ export const TextNode = memo(({ id, data, selected }: NodeProps) => {
 export const IconNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as any;
   const Icon = nodeData.iconComponent;
+  const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
-    <div className={`group flex items-center justify-center p-4 rounded-xl border-2 border-transparent transition-all ${selected ? 'border-primary bg-primary/5 shadow-lg' : ''}`}>
+    <div style={style} className={`group flex items-center justify-center p-4 rounded-xl border-2 border-transparent transition-all ${selected ? 'border-primary bg-primary/5 shadow-lg' : ''}`}>
        <NodeResizer minWidth={60} minHeight={60} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
        <SelectionToolbar isVisible={selected} nodeId={id} />
        {Icon ? <Icon className="h-full w-full text-primary" /> : <Layers className="h-full w-full" />}

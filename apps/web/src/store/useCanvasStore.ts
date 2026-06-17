@@ -336,7 +336,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     },
 
     onNodesChange: (changes) => {
-      const { previewNodes, nodes } = get();
+      const { previewNodes, nodes, yNodes } = get();
       const previewChanges = changes.filter(c => 'id' in c && c.id.startsWith('preview-'));
       const realChanges = changes.filter(c => !('id' in c) || !c.id.startsWith('preview-'));
       if (previewChanges.length > 0) set({ previewNodes: applyNodeChanges(previewChanges, previewNodes) });
@@ -344,6 +344,21 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         const updatedNodes = applyNodeChanges(realChanges, nodes);
         get().updateSelection(updatedNodes.filter(n => n.selected).map(n => n.id));
         set({ nodes: updatedNodes });
+
+        // Sync dimensions back to Yjs if this was a dimensions change (from resizing)
+        realChanges.forEach(change => {
+            if (change.type === 'dimensions' && change.dimensions) {
+                const node = yNodes.get(change.id);
+                if (node) {
+                    // Update style or style metadata to persist width/height
+                    const metadata = typeof node.data === 'string' ? JSON.parse(node.data) : node.data;
+                    const updatedData = { ...metadata, width: change.dimensions.width, height: change.dimensions.height };
+                    const updatedNode = { ...node, data: updatedData };
+                    yNodes.set(change.id, updatedNode);
+                    get().saveNodePosition(updatedNode); // Save the resize to the backend
+                }
+            }
+        });
       }
     },
     
