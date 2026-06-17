@@ -2,6 +2,7 @@
 
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
+import { Layers } from 'lucide-react';
 
 const handleStyle = { width: 8, height: 8, background: '#3b82f6', border: '2px solid white' };
 

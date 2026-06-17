@@ -95,7 +95,7 @@ interface CanvasState {
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;
   
-  addNode: (type: string, position: { x: number; y: number }) => void;
+  addNode: (type: string, position: { x: number; y: number }, data?: any) => void;
   saveNodePosition: (node: Node) => void;
   deleteElements: (nodesToDelete: Node[], edgesToDelete: Edge[]) => void;
   

@@ -196,7 +196,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
 
         <AiSidePanel />
 
-        <Panel position="left" className="ml-4 top-1/2 -translate-y-1/2">
+        <Panel position="top-left" className="ml-4 top-1/2 -translate-y-1/2">
           <FloatingToolbar onAddNode={handleAddNode} />
         </Panel>
 
