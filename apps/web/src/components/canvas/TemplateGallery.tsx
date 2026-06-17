@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Template {
   id: string;
@@ -110,35 +111,46 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
             </DialogHeader>
 
             <ScrollArea className="flex-1 p-6 pt-2">
-              <div className="grid grid-cols-2 gap-4">
-                {filteredTemplates.map((template) => (
-                  <div
-                    key={template.id}
-                    className={cn(
-                      "group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md",
-                      selectedTemplate?.id === template.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "bg-card"
-                    )}
-                    onClick={() => {
-                        setSelectedTemplate(template);
-                        if (!boardName) setBoardName(template.name);
-                    }}
-                  >
-                    <div className={cn("h-32 w-full rounded-lg mb-1 flex items-center justify-center relative overflow-hidden", template.previewColor)}>
-                        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <template.icon className="h-12 w-12 text-white/90 drop-shadow-lg" />
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-sm leading-none mb-2">{template.name}</h3>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{template.description}</p>
-                    </div>
-                    {selectedTemplate?.id === template.id && (
-                        <div className="absolute top-2 right-2 h-5 w-5 bg-primary rounded-full flex items-center justify-center">
-                            <Check className="h-3 w-3 text-white" />
-                        </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <motion.div 
+                layout
+                className="grid grid-cols-2 gap-4"
+              >
+                <AnimatePresence>
+                  {filteredTemplates.map((template) => (
+                    <motion.div
+                      key={template.id}
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={cn(
+                        "group relative flex flex-col gap-3 rounded-xl border p-4 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md",
+                        selectedTemplate?.id === template.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "bg-card"
+                      )}
+                      onClick={() => {
+                          setSelectedTemplate(template);
+                          if (!boardName) setBoardName(template.name);
+                      }}
+                    >
+                      <div className={cn("h-32 w-full rounded-lg mb-1 flex items-center justify-center relative overflow-hidden", template.previewColor)}>
+                          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <template.icon className="h-12 w-12 text-white/90 drop-shadow-lg" />
+                      </div>
+                      <div>
+                          <h3 className="font-semibold text-sm leading-none mb-2">{template.name}</h3>
+                          <p className="text-xs text-muted-foreground line-clamp-1">{template.description}</p>
+                      </div>
+                      {selectedTemplate?.id === template.id && (
+                          <div className="absolute top-2 right-2 h-5 w-5 bg-primary rounded-full flex items-center justify-center">
+                              <Check className="h-3 w-3 text-white" />
+                          </div>
+                      )}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
             </ScrollArea>
 
             <div className="p-6 border-t bg-muted/10 space-y-4">

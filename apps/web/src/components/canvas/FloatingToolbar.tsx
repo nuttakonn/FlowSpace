@@ -79,6 +79,8 @@ const ICON_LIST = [
   { name: 'Refresh', icon: RefreshCw },
 ];
 
+import { motion } from 'framer-motion';
+
 interface ToolbarButtonProps {
   icon: LucideIcon;
   label: string;
@@ -91,14 +93,16 @@ const ToolbarButton = ({ icon: Icon, label, onClick, isActive, className }: Tool
   <TooltipProvider delayDuration={300}>
     <Tooltip>
       <TooltipTrigger asChild>
-        <Button
-          variant={isActive ? "secondary" : "ghost"}
-          size="icon"
-          className={cn("h-10 w-10 rounded-lg", isActive && "bg-primary/10 text-primary", className)}
-          onClick={onClick}
-        >
-          <Icon className="h-5 w-5" />
-        </Button>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+          <Button
+            variant={isActive ? "secondary" : "ghost"}
+            size="icon"
+            className={cn("h-10 w-10 rounded-lg", isActive && "bg-primary/10 text-primary", className)}
+            onClick={onClick}
+          >
+            <Icon className="h-5 w-5" />
+          </Button>
+        </motion.div>
       </TooltipTrigger>
       <TooltipContent side="right">
         <p>{label}</p>
@@ -132,7 +136,11 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
   const filteredIcons = ICON_LIST.filter(i => i.name.toLowerCase().includes(iconSearch.toLowerCase()));
 
   return (
-    <div className={cn("flex flex-col gap-2 p-2 bg-background/80 backdrop-blur border rounded-xl shadow-lg", className)}>
+    <motion.div 
+      initial={{ x: -20, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      className={cn("flex flex-col gap-2 p-2 bg-background/80 backdrop-blur border rounded-xl shadow-lg", className)}
+    >
       <ToolbarButton 
         icon={MousePointer2} 
         label="Select (V)" 
