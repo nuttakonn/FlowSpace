@@ -254,6 +254,6 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
         isActive={activeTool === 'connector'} 
         onClick={() => setActiveTool('connector')} 
       />
-    </div>
+    </motion.div>
   );
 }
