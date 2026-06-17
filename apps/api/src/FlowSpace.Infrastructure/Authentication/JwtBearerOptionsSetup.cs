@@ -27,6 +27,25 @@ public class JwtBearerOptionsSetup : IConfigureNamedOptions<JwtBearerOptions>
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(_jwtSettings.Secret))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+
+                // If the request is for our hub...
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/hubs/collaboration")))
+                {
+                    // Read the token out of the query string
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     }
 
     public void Configure(JwtBearerOptions options) => Configure(Options.DefaultName, options);
