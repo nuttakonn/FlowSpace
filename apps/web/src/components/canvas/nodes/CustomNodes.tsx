@@ -1,8 +1,9 @@
 "use client";
 
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Layers } from 'lucide-react';
+import { useCanvasStore } from '@/store/useCanvasStore';
 
 const handleStyle = { width: 8, height: 8, background: '#3b82f6', border: '2px solid white' };
 
@@ -10,7 +11,49 @@ interface CustomNodeData {
   label?: string;
 }
 
-export const DiamondNode = memo(({ data, selected }: NodeProps) => {
+const NodeLabelInput = ({ id, label }: { id: string; label?: string }) => {
+  const [value, setValue] = useState(label || '');
+  const updateNodeLabel = useCanvasStore(s => s.updateNodeLabel);
+
+  useEffect(() => {
+    setValue(label || '');
+  }, [label]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setValue(e.target.value);
+  };
+
+  const handleBlur = () => {
+    updateNodeLabel(id, value);
+  };
+
+  return (
+    <textarea
+      value={value}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      className="nodrag nowheel w-full bg-transparent text-center focus:outline-none resize-none overflow-hidden text-xs font-medium"
+      rows={1}
+      spellCheck={false}
+      style={{ minHeight: '1.2em' }}
+    />
+  );
+};
+
+export const RectangleNode = memo(({ id, data, selected }: NodeProps) => {
+  const nodeData = data as CustomNodeData;
+  return (
+    <div className={`flex h-20 w-40 items-center justify-center rounded-lg border-2 border-primary bg-background px-4 py-2 text-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+      <NodeLabelInput id={id} label={nodeData.label} />
+      <Handle type="target" position={Position.Top} style={handleStyle} />
+      <Handle type="source" position={Position.Bottom} style={handleStyle} />
+      <Handle type="source" position={Position.Left} style={handleStyle} />
+      <Handle type="source" position={Position.Right} style={handleStyle} />
+    </div>
+  );
+});
+
+export const DiamondNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
   return (
     <div className={`relative flex items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
@@ -18,8 +61,8 @@ export const DiamondNode = memo(({ data, selected }: NodeProps) => {
         className="w-32 h-32 bg-background border-2 border-primary rotate-45 flex items-center justify-center"
         style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
       >
-        <div className="-rotate-45 text-center px-2">
-          <p className="text-xs font-medium line-clamp-2">{nodeData.label || 'Decision'}</p>
+        <div className="-rotate-45 text-center px-4 w-full">
+          <NodeLabelInput id={id} label={nodeData.label} />
         </div>
       </div>
       
@@ -31,25 +74,25 @@ export const DiamondNode = memo(({ data, selected }: NodeProps) => {
   );
 });
 
-export const CircleNode = memo(({ data, selected }: NodeProps) => {
+export const CircleNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
   return (
-    <div className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-background p-2 text-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
-      <p className="text-xs font-medium">{nodeData.label || 'Start/End'}</p>
+    <div className={`flex h-24 w-24 items-center justify-center rounded-full border-2 border-primary bg-background p-4 text-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+      <NodeLabelInput id={id} label={nodeData.label} />
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <Handle type="source" position={Position.Bottom} style={handleStyle} />
     </div>
   );
 });
 
-export const DatabaseNode = memo(({ data, selected }: NodeProps) => {
+export const DatabaseNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
   return (
-    <div className={`relative flex h-24 w-20 flex-col items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div className={`relative flex h-24 w-24 flex-col items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <div className="absolute top-0 h-4 w-full rounded-[50%] border-2 border-primary bg-background z-10" />
-      <div className="flex h-full w-full flex-col items-center justify-center border-x-2 border-b-2 border-primary bg-background rounded-b-lg pt-4">
-        <p className="text-[10px] font-bold uppercase text-muted-foreground">DB</p>
-        <p className="text-xs font-medium px-1 text-center">{nodeData.label || 'Store'}</p>
+      <div className="flex h-full w-full flex-col items-center justify-center border-x-2 border-b-2 border-primary bg-background rounded-b-lg pt-4 px-2">
+        <p className="text-[8px] font-bold uppercase text-muted-foreground mb-1">DB</p>
+        <NodeLabelInput id={id} label={nodeData.label} />
       </div>
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <Handle type="source" position={Position.Bottom} style={handleStyle} />
@@ -57,17 +100,17 @@ export const DatabaseNode = memo(({ data, selected }: NodeProps) => {
   );
 });
 
-export const CloudNode = memo(({ data, selected }: NodeProps) => {
+export const CloudNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
   return (
-    <div className={`relative flex h-20 w-32 items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div className={`relative flex h-20 w-36 items-center justify-center transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <div className="absolute inset-0 bg-background border-2 border-primary rounded-[40%] flex items-center justify-center overflow-hidden">
         <div className="absolute -top-4 -left-2 h-12 w-12 rounded-full border-2 border-primary bg-background" />
         <div className="absolute -top-6 left-8 h-14 w-14 rounded-full border-2 border-primary bg-background" />
         <div className="absolute -top-4 right-2 h-10 w-10 rounded-full border-2 border-primary bg-background" />
       </div>
-      <div className="z-10 text-center px-4">
-        <p className="text-xs font-medium">{nodeData.label || 'Cloud Service'}</p>
+      <div className="z-10 text-center px-6 w-full">
+        <NodeLabelInput id={id} label={nodeData.label} />
       </div>
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <Handle type="source" position={Position.Bottom} style={handleStyle} />
@@ -75,18 +118,20 @@ export const CloudNode = memo(({ data, selected }: NodeProps) => {
   );
 });
 
-export const BrowserNode = memo(({ data, selected }: NodeProps) => {
+export const BrowserNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
   return (
-    <div className={`flex flex-col h-64 w-96 rounded-lg border-2 border-primary bg-background overflow-hidden transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+    <div className={`flex flex-col h-64 w-96 rounded-lg border-2 border-primary bg-background shadow-lg overflow-hidden transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
       <div className="h-6 border-b-2 border-primary bg-muted flex items-center px-2 gap-1">
         <div className="h-2 w-2 rounded-full bg-red-400" />
         <div className="h-2 w-2 rounded-full bg-yellow-400" />
         <div className="h-2 w-2 rounded-full bg-green-400" />
         <div className="ml-2 h-3 w-32 rounded bg-background" />
       </div>
-      <div className="flex-1 p-4 flex items-center justify-center text-center">
-        <p className="text-sm font-semibold">{nodeData.label || 'Web Browser'}</p>
+      <div className="flex-1 p-6 flex items-center justify-center text-center">
+        <div className="w-full">
+          <NodeLabelInput id={id} label={nodeData.label} />
+        </div>
       </div>
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <Handle type="source" position={Position.Bottom} style={handleStyle} />
@@ -94,11 +139,11 @@ export const BrowserNode = memo(({ data, selected }: NodeProps) => {
   );
 });
 
-export const StickyNoteNode = memo(({ data, selected }: NodeProps) => {
+export const StickyNoteNode = memo(({ id, data, selected }: NodeProps) => {
   const nodeData = data as CustomNodeData;
   return (
-    <div className={`flex h-40 w-40 flex-col items-center justify-center bg-yellow-100 shadow-md p-4 text-center transition-all ${selected ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
-      <p className="text-sm font-medium text-yellow-900 leading-tight">{nodeData.label || 'Take a note...'}</p>
+    <div className={`flex h-40 w-40 flex-col items-center justify-center bg-yellow-100 shadow-md p-6 text-center transition-all ${selected ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
+      <NodeLabelInput id={id} label={nodeData.label} />
       <div className="absolute bottom-0 right-0 h-6 w-6 bg-yellow-200" style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }} />
       <Handle type="target" position={Position.Top} style={handleStyle} />
       <Handle type="source" position={Position.Bottom} style={handleStyle} />
@@ -125,3 +170,4 @@ CloudNode.displayName = 'CloudNode';
 BrowserNode.displayName = 'BrowserNode';
 StickyNoteNode.displayName = 'StickyNoteNode';
 IconNode.displayName = 'IconNode';
+RectangleNode.displayName = 'RectangleNode';

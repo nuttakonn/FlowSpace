@@ -23,9 +23,10 @@ import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
 import { AiSidePanel } from "./AiSidePanel";
 import { FloatingToolbar } from "./FloatingToolbar";
-import { DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode } from "./nodes/CustomNodes";
+import { RectangleNode, DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode } from "./nodes/CustomNodes";
 
 const nodeTypes = {
+  rectangle: RectangleNode,
   diamond: DiamondNode,
   circle: CircleNode,
   database: DatabaseNode,
@@ -196,7 +197,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
 
         <AiSidePanel />
 
-        <Panel position="top-left" className="ml-4 top-1/2 -translate-y-1/2">
+        <Panel position="top-left" className="ml-4 mt-20">
           <FloatingToolbar onAddNode={handleAddNode} />
         </Panel>
 

@@ -96,6 +96,7 @@ interface CanvasState {
   onConnect: (connection: Connection) => void;
   
   addNode: (type: string, position: { x: number; y: number }, data?: any) => void;
+  updateNodeLabel: (id: string, label: string) => void;
   saveNodePosition: (node: Node) => void;
   deleteElements: (nodesToDelete: Node[], edgesToDelete: Edge[]) => void;
   
@@ -372,6 +373,23 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const tempNode: Node = { id: tempId, type: type.toLowerCase(), position, data: nodeData };
       yNodes.set(tempId, tempNode);
       get().enqueueMutation({ type: 'CREATE_NODE', tempId, payload: { type, x: position.x, y: position.y, metadata: JSON.stringify(nodeData) } });
+    },
+
+    updateNodeLabel: (id: string, label: string) => {
+      const { yNodes } = get();
+      const node = yNodes.get(id);
+      if (node) {
+        const updatedNode = { ...node, data: { ...node.data, label } };
+        yNodes.set(id, updatedNode);
+        
+        const realId = get().resolveRealId(id);
+        if (!realId.startsWith('temp-')) {
+          get().enqueueMutation({ 
+            type: 'UPDATE_NODE', 
+            payload: { id: realId, type: updatedNode.type, x: updatedNode.position.x, y: updatedNode.position.y, metadata: JSON.stringify(updatedNode.data) } 
+          });
+        }
+      }
     },
 
     saveNodePosition: (node) => {
