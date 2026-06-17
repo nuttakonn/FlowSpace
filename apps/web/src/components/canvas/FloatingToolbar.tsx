@@ -70,34 +70,34 @@ import {
 import { cn } from '@/lib/utils';
 
 const ICON_LIST = [
-  { name: 'User', icon: User },
-  { name: 'Settings', icon: Settings },
-  { name: 'Search', icon: Search },
-  { name: 'Bell', icon: Bell },
-  { name: 'Mail', icon: Mail },
-  { name: 'Calendar', icon: Calendar },
-  { name: 'Camera', icon: Camera },
-  { name: 'Heart', icon: Heart },
-  { name: 'Star', icon: Star },
-  { name: 'Home', icon: Home },
-  { name: 'Map', icon: Map },
-  { name: 'Link', icon: Link },
-  { name: 'Lock', icon: Lock },
-  { name: 'Globe', icon: Globe },
-  { name: 'Cart', icon: ShoppingCart },
-  { name: 'Zap', icon: Zap },
-  { name: 'Check', icon: CheckCircle2 },
-  { name: 'Alert', icon: AlertCircle },
-  { name: 'Help', icon: HelpCircle },
-  { name: 'File', icon: FileText },
-  { name: 'Image', icon: Image },
-  { name: 'Video', icon: Video },
-  { name: 'Music', icon: Music },
-  { name: 'Share', icon: Share2 },
-  { name: 'Download', icon: Download },
-  { name: 'Trash', icon: Trash2 },
-  { name: 'Filter', icon: Filter },
-  { name: 'Refresh', icon: RefreshCw },
+  { name: 'User', iconName: 'User', icon: User },
+  { name: 'Settings', iconName: 'Settings', icon: Settings },
+  { name: 'Search', iconName: 'Search', icon: Search },
+  { name: 'Bell', iconName: 'Bell', icon: Bell },
+  { name: 'Mail', iconName: 'Mail', icon: Mail },
+  { name: 'Calendar', iconName: 'Calendar', icon: Calendar },
+  { name: 'Camera', iconName: 'Camera', icon: Camera },
+  { name: 'Heart', iconName: 'Heart', icon: Heart },
+  { name: 'Star', iconName: 'Star', icon: Star },
+  { name: 'Home', iconName: 'Home', icon: Home },
+  { name: 'Map', iconName: 'Map', icon: Map },
+  { name: 'Link', iconName: 'Link', icon: Link },
+  { name: 'Lock', iconName: 'Lock', icon: Lock },
+  { name: 'Globe', iconName: 'Globe', icon: Globe },
+  { name: 'Cart', iconName: 'ShoppingCart', icon: ShoppingCart },
+  { name: 'Zap', iconName: 'Zap', icon: Zap },
+  { name: 'Check', iconName: 'CheckCircle2', icon: CheckCircle2 },
+  { name: 'Alert', iconName: 'AlertCircle', icon: AlertCircle },
+  { name: 'Help', iconName: 'HelpCircle', icon: HelpCircle },
+  { name: 'File', iconName: 'FileText', icon: FileText },
+  { name: 'Image', iconName: 'Image', icon: Image },
+  { name: 'Video', iconName: 'Video', icon: Video },
+  { name: 'Music', iconName: 'Music', icon: Music },
+  { name: 'Share', iconName: 'Share2', icon: Share2 },
+  { name: 'Download', iconName: 'Download', icon: Download },
+  { name: 'Trash', iconName: 'Trash2', icon: Trash2 },
+  { name: 'Filter', iconName: 'Filter', icon: Filter },
+  { name: 'Refresh', iconName: 'RefreshCw', icon: RefreshCw },
 ];
 
 import { motion } from 'framer-motion';
@@ -150,16 +150,16 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
   ];
 
   const infrastructure = [
-    { type: 'Infrastructure', label: 'AWS', icon: Cloud, data: { color: 'bg-orange-500/10 text-orange-600', sublabel: 'Cloud Service' } },
-    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, data: { color: 'bg-blue-500/10 text-blue-600', sublabel: 'Cluster' } },
-    { type: 'Infrastructure', label: 'Docker', icon: Container, data: { color: 'bg-cyan-500/10 text-cyan-600', sublabel: 'Container' } },
-    { type: 'Infrastructure', label: 'Server', icon: Server, data: { color: 'bg-slate-500/10 text-slate-600', sublabel: 'Compute' } },
-    { type: 'Infrastructure', label: 'Load Balancer', icon: Network, data: { color: 'bg-indigo-500/10 text-indigo-600', sublabel: 'Network' } },
-    { type: 'Infrastructure', label: 'Firewall', icon: Shield, data: { color: 'bg-red-500/10 text-red-600', sublabel: 'Security' } },
-    { type: 'Infrastructure', label: 'API Gateway', icon: Zap, data: { color: 'bg-yellow-500/10 text-yellow-600', sublabel: 'API' } },
-    { type: 'Infrastructure', label: 'Function', icon: Cpu, data: { color: 'bg-pink-500/10 text-pink-600', sublabel: 'Lambda' } },
-    { type: 'Infrastructure', label: 'Kafka', icon: Activity, data: { color: 'bg-purple-500/10 text-purple-600', sublabel: 'Streaming' } },
-    { type: 'Infrastructure', label: 'Storage', icon: HardDrive, data: { color: 'bg-emerald-500/10 text-emerald-600', sublabel: 'S3/EBS' } },
+    { type: 'Infrastructure', label: 'AWS', icon: Cloud, iconName: 'Cloud', data: { color: 'bg-orange-500/10 text-orange-600', sublabel: 'Cloud Service' } },
+    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, iconName: 'Box', data: { color: 'bg-blue-500/10 text-blue-600', sublabel: 'Cluster' } },
+    { type: 'Infrastructure', label: 'Docker', icon: Container, iconName: 'Container', data: { color: 'bg-cyan-500/10 text-cyan-600', sublabel: 'Container' } },
+    { type: 'Infrastructure', label: 'Server', icon: Server, iconName: 'Server', data: { color: 'bg-slate-500/10 text-slate-600', sublabel: 'Compute' } },
+    { type: 'Infrastructure', label: 'Load Balancer', icon: Network, iconName: 'Network', data: { color: 'bg-indigo-500/10 text-indigo-600', sublabel: 'Network' } },
+    { type: 'Infrastructure', label: 'Firewall', icon: Shield, iconName: 'Shield', data: { color: 'bg-red-500/10 text-red-600', sublabel: 'Security' } },
+    { type: 'Infrastructure', label: 'API Gateway', icon: Zap, iconName: 'Zap', data: { color: 'bg-yellow-500/10 text-yellow-600', sublabel: 'API' } },
+    { type: 'Infrastructure', label: 'Function', icon: Cpu, iconName: 'Cpu', data: { color: 'bg-pink-500/10 text-pink-600', sublabel: 'Lambda' } },
+    { type: 'Infrastructure', label: 'Kafka', icon: Activity, iconName: 'Activity', data: { color: 'bg-purple-500/10 text-purple-600', sublabel: 'Streaming' } },
+    { type: 'Infrastructure', label: 'Storage', icon: HardDrive, iconName: 'HardDrive', data: { color: 'bg-emerald-500/10 text-emerald-600', sublabel: 'S3/EBS' } },
   ];
 
   const devices = [
@@ -238,24 +238,23 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
           </div>
 
           <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Infrastructure</p>
-              <div className="grid grid-cols-2 gap-1 px-1">
-                {infrastructure.map((infra) => (
-                    <Button
-                    key={infra.label}
-                    variant="ghost"
-                    size="sm"
-                    className="flex flex-col h-16 gap-1 p-2"
-                    onClick={() => {
-                        onAddNode(infra.type, { ...infra.data, iconComponent: infra.icon, label: infra.label });
-                        setActiveTool(infra.type);
-                    }}
-                    >
-                    <infra.icon className={cn("h-5 w-5", infra.data.color.split(' ')[1])} />
-                    <span className="text-[10px] font-medium text-center leading-none">{infra.label}</span>
-                    </Button>
-                ))}
-              </div>
-
+          <div className="grid grid-cols-2 gap-1 px-1">
+            {infrastructure.map((infra) => (
+                <Button
+                key={infra.label}
+                variant="ghost"
+                size="sm"
+                className="flex flex-col h-16 gap-1 p-2"
+                onClick={() => {
+                    onAddNode(infra.type, { ...infra.data, iconName: infra.iconName, label: infra.label });
+                    setActiveTool(infra.type);
+                }}
+                >
+                <infra.icon className={cn("h-5 w-5", infra.data.color.split(' ')[1])} />
+                <span className="text-[10px] font-medium text-center leading-none">{infra.label}</span>
+                </Button>
+            ))}
+          </div>
               <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Wireframes</p>
               {wireframes.map((wf) => (
                 <Button
@@ -307,7 +306,7 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
                   size="icon"
                   className="h-12 w-12"
                   onClick={() => {
-                    onAddNode('Icon', { iconComponent: item.icon, label: '' });
+                    onAddNode('Icon', { iconName: item.iconName, label: '' });
                     setActiveTool('icon');
                   }}
                   title={item.name}

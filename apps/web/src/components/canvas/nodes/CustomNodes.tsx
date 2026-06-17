@@ -27,6 +27,7 @@ import {
   FileCode,
   HardDrive
 } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useCanvasStore } from '@/store/useCanvasStore';
 import { cn } from '@/lib/utils';
 import { SelectionToolbar } from '../SelectionToolbar';
@@ -35,7 +36,7 @@ const handleStyle = { width: 8, height: 8, background: '#3b82f6', border: '2px s
 
 interface CustomNodeData {
   label?: string;
-  iconComponent?: any;
+  iconName?: string;
   color?: string;
   sublabel?: string;
   width?: number;
@@ -168,15 +169,16 @@ export const CloudNode = memo(({ id, data, selected }: NodeProps) => {
 });
 
 export const InfrastructureNode = memo(({ id, data, selected }: NodeProps) => {
-  const nodeData = data as any;
-  const Icon = nodeData.iconComponent;
+  const nodeData = data as CustomNodeData;
+  const iconName = nodeData.iconName as keyof typeof LucideIcons | undefined;
+  const Icon = iconName ? LucideIcons[iconName] as React.ElementType : null;
   const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
     <div style={style} className={`group flex flex-col items-center justify-center h-full w-full p-4 rounded-2xl border-2 bg-background transition-all ${selected ? 'border-primary ring-2 ring-primary/20 shadow-xl scale-[1.02]' : 'border-border shadow-sm'}`}>
        <NodeResizer minWidth={120} minHeight={120} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
        <SelectionToolbar isVisible={selected} nodeId={id} />
        <div className={cn("p-4 rounded-xl mb-3 shadow-inner transition-colors", nodeData.color || "bg-primary/10 text-primary")}>
-          {Icon ? <Icon className="h-8 w-8" /> : <Layers className="h-8 w-8" />}
+          {Icon ? <Icon className="h-8 w-8" /> : <LucideIcons.Layers className="h-8 w-8" />}
        </div>
        <div className="text-center w-full px-2">
           <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-bold" />
@@ -283,14 +285,15 @@ export const TextNode = memo(({ id, data, selected }: NodeProps) => {
 });
 
 export const IconNode = memo(({ id, data, selected }: NodeProps) => {
-  const nodeData = data as any;
-  const Icon = nodeData.iconComponent;
+  const nodeData = data as CustomNodeData;
+  const iconName = nodeData.iconName as keyof typeof LucideIcons | undefined;
+  const Icon = iconName ? LucideIcons[iconName] as React.ElementType : null;
   const style = { width: nodeData.width || undefined, height: nodeData.height || undefined };
   return (
     <div style={style} className={`group flex items-center justify-center p-4 rounded-xl border-2 border-transparent transition-all ${selected ? 'border-primary bg-primary/5 shadow-lg' : ''}`}>
        <NodeResizer minWidth={60} minHeight={60} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
        <SelectionToolbar isVisible={selected} nodeId={id} />
-       {Icon ? <Icon className="h-full w-full text-primary" /> : <Layers className="h-full w-full" />}
+       {Icon ? <Icon className="h-full w-full text-primary" /> : <LucideIcons.Layers className="h-full w-full" />}
        <Handle type="target" position={Position.Top} style={handleStyle} />
        <Handle type="source" position={Position.Bottom} style={handleStyle} />
     </div>
