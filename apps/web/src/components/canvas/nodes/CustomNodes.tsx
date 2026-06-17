@@ -4,6 +4,7 @@ import React, { memo, useState, useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Layers } from 'lucide-react';
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { cn } from '@/lib/utils';
 
 const handleStyle = { width: 8, height: 8, background: '#3b82f6', border: '2px solid white' };
 
@@ -151,6 +152,36 @@ export const StickyNoteNode = memo(({ id, data, selected }: NodeProps) => {
   );
 });
 
+export const TextNode = memo(({ id, data, selected }: NodeProps) => {
+  const nodeData = data as CustomNodeData;
+  return (
+    <div className={`p-2 min-w-[100px] transition-all ${selected ? 'ring-2 ring-primary ring-offset-2 rounded' : ''}`}>
+      <NodeLabelInput id={id} label={nodeData.label} />
+      <Handle type="target" position={Position.Top} style={{ visibility: 'hidden' }} />
+      <Handle type="source" position={Position.Bottom} style={{ visibility: 'hidden' }} />
+    </div>
+  );
+});
+
+export const InfrastructureNode = memo(({ id, data, selected }: NodeProps) => {
+  const nodeData = data as any;
+  const Icon = nodeData.iconComponent;
+  return (
+    <div className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 bg-background transition-all ${selected ? 'border-primary ring-2 ring-primary/20' : 'border-border'}`}>
+       <div className={cn("p-3 rounded-lg mb-2", nodeData.color || "bg-primary/10 text-primary")}>
+          {Icon ? <Icon className="h-8 w-8" /> : <Layers className="h-8 w-8" />}
+       </div>
+       <div className="text-center min-w-[80px]">
+          <NodeLabelInput id={id} label={nodeData.label} />
+       </div>
+       <Handle type="target" position={Position.Top} style={handleStyle} />
+       <Handle type="source" position={Position.Bottom} style={handleStyle} />
+       <Handle type="source" position={Position.Left} style={handleStyle} />
+       <Handle type="source" position={Position.Right} style={handleStyle} />
+    </div>
+  );
+});
+
 export const IconNode = memo(({ data, selected }: NodeProps) => {
   const nodeData = data as any;
   const Icon = nodeData.iconComponent;
@@ -171,3 +202,5 @@ BrowserNode.displayName = 'BrowserNode';
 StickyNoteNode.displayName = 'StickyNoteNode';
 IconNode.displayName = 'IconNode';
 RectangleNode.displayName = 'RectangleNode';
+TextNode.displayName = 'TextNode';
+InfrastructureNode.displayName = 'InfrastructureNode';

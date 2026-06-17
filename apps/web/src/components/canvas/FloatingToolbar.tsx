@@ -42,7 +42,9 @@ import {
   Trash2,
   Filter,
   RefreshCw,
-  MoreHorizontal
+  MoreHorizontal,
+  Box,
+  Server
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -145,6 +147,12 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
     { type: 'StickyNote', icon: StickyNote, label: 'Sticky Note' },
   ];
 
+  const infrastructure = [
+    { type: 'Infrastructure', label: 'AWS', icon: Cloud, data: { color: 'bg-orange-500/10 text-orange-600', label: 'AWS Service' } },
+    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, data: { color: 'bg-blue-500/10 text-blue-600', label: 'K8s Cluster' } },
+    { type: 'Infrastructure', label: 'Server', icon: Server, data: { color: 'bg-slate-500/10 text-slate-600', label: 'Bare Metal' } },
+  ];
+
   const filteredIcons = ICON_LIST.filter(i => i.name.toLowerCase().includes(iconSearch.toLowerCase()));
 
   return (
@@ -168,12 +176,12 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
             <ToolbarButton 
               icon={Plus} 
               label="Add Shape" 
-              isActive={['Rectangle', 'Circle', 'Diamond', 'Database', 'Cloud'].includes(activeTool)}
+              isActive={['Rectangle', 'Circle', 'Diamond', 'Database', 'Cloud', 'Infrastructure'].includes(activeTool)}
             />
           </div>
         </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="w-48 p-2 flex flex-col gap-1">
-          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Shapes</p>
+        <PopoverContent side="right" align="start" className="w-56 p-2 flex flex-col gap-1">
+          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Basic Shapes</p>
           {shapes.map((shape) => (
             <Button
               key={shape.type}
@@ -188,6 +196,23 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
               <span className="text-sm font-medium">{shape.label}</span>
             </Button>
           ))}
+          
+          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-2">Infrastructure</p>
+          {infrastructure.map((infra) => (
+            <Button
+              key={infra.label}
+              variant="ghost"
+              className="justify-start h-9 px-2 gap-3"
+              onClick={() => {
+                onAddNode(infra.type, { ...infra.data, iconComponent: infra.icon });
+                setActiveTool(infra.type);
+              }}
+            >
+              <infra.icon className="h-4 w-4" />
+              <span className="text-sm font-medium">{infra.label}</span>
+            </Button>
+          ))}
+
           <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-2">Wireframes</p>
           {wireframes.map((wf) => (
             <Button
