@@ -22,6 +22,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.addEventListener('error', function(e) {
+                if (e.message === 'ResizeObserver loop limit exceeded' || e.message === 'ResizeObserver loop completed with undelivered notifications.') {
+                  e.stopImmediatePropagation();
+                }
+              });
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <GlobalErrorBoundary>
           <WebVitals />
