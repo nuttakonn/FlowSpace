@@ -22,6 +22,7 @@ import { RemoteCursors } from "./RemoteCursors";
 import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
 import { AiSidePanel } from "./AiSidePanel";
+import { FloatingToolbar } from "./FloatingToolbar";
 import { DiamondNode, CircleNode, DatabaseNode, CloudNode } from "./nodes/CustomNodes";
 
 const nodeTypes = {
@@ -127,8 +128,8 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo, selectAll]);
 
-  const handleAddNode = () => {
-    addNode("Rectangle", { x: Math.random() * 200, y: Math.random() * 200 });
+  const handleAddNode = (type: string) => {
+    addNode(type, { x: Math.random() * 200, y: Math.random() * 200 });
   };
 
   const onNodeDragStart = useCallback(() => {
@@ -192,34 +193,33 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
 
         <AiSidePanel />
 
-        <Panel position="top-left" className="bg-background/80 backdrop-blur p-2 rounded-lg border shadow-sm flex gap-2 items-center">
-          <Button variant="secondary" size="sm" onClick={handleAddNode}>
-            <PlusSquare className="w-4 h-4 mr-2" /> Add Node
-          </Button>
-          <div className="w-px h-6 bg-border mx-2" />
-          <Button variant="ghost" size="icon" onClick={undo} disabled={past.length === 0}>
+        <Panel position="left" className="ml-4 top-1/2 -translate-y-1/2">
+          <FloatingToolbar onAddNode={handleAddNode} />
+        </Panel>
+
+        <Panel position="top-center" className="mt-4 bg-background/80 backdrop-blur p-1 rounded-lg border shadow-sm flex gap-1 items-center">
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={undo} disabled={past.length === 0}>
             <Undo className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={redo} disabled={future.length === 0}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={redo} disabled={future.length === 0}>
             <Redo className="w-4 h-4" />
           </Button>
-          
+          <div className="w-px h-4 bg-border mx-1" />
           <VersionHistory />
-
-          <div className="text-xs text-muted-foreground ml-2 flex items-center gap-1 w-24">
+          <div className="w-px h-4 bg-border mx-1" />
+          <div className="text-[10px] text-muted-foreground px-2 flex items-center gap-1 min-w-[70px]">
             {syncStatus === 'saving' && <><Loader2 className="w-3 h-3 text-blue-500 animate-spin" /> Saving</>}
             {syncStatus === 'saved' && <><CloudUpload className="w-3 h-3 text-green-500" /> Saved</>}
             {syncStatus === 'failed' && <><CloudOff className="w-3 h-3 text-destructive" /> Offline</>}
             {syncStatus === 'idle' && <><CloudUpload className="w-3 h-3 text-muted-foreground" /> Synced</>}
           </div>
+        </Panel>
 
-          <div className="w-px h-6 bg-border mx-2" />
-          
-          <div className="flex -space-x-2">
+        <Panel position="top-right" className="mt-4 mr-4 flex -space-x-2">
             {Object.values(remoteUsers).slice(0, 5).map((user, i) => (
               <div
                 key={i}
-                className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white shadow-sm"
+                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white shadow-sm"
                 style={{ backgroundColor: user.color }}
                 title={user.name}
               >
@@ -227,16 +227,15 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
               </div>
             ))}
             {Object.values(remoteUsers).length > 5 && (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground shadow-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground shadow-sm">
                 +{Object.values(remoteUsers).length - 5}
               </div>
             )}
             {Object.values(remoteUsers).length === 0 && (
-              <div className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed text-muted-foreground">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed text-muted-foreground bg-background/50">
                 <UserCircle2 className="h-4 w-4" />
               </div>
             )}
-          </div>
         </Panel>
       </ReactFlow>
     </div>
