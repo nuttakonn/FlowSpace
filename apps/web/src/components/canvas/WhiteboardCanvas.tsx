@@ -103,7 +103,7 @@ export function WhiteboardCanvas({ boardId, workspaceId, accessToken, userName, 
   }, [userName]);
 
   return (
-    <div className="h-full w-full overflow-hidden border-t">
+    <div className="absolute inset-0 overflow-hidden">
       <Tldraw 
         store={store} 
         onMount={handleMount}
