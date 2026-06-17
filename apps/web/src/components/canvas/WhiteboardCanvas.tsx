@@ -17,7 +17,10 @@ interface WhiteboardCanvasProps {
 }
 
 export function WhiteboardCanvas({ boardId, workspaceId, accessToken, userName, userId, token }: WhiteboardCanvasProps) {
-  const { initialize, disconnect, yWhiteboard, updateWhiteboard } = useCanvasStore();
+  const initialize = useCanvasStore(s => s.initialize);
+  const disconnect = useCanvasStore(s => s.disconnect);
+  const yWhiteboard = useCanvasStore(s => s.yWhiteboard);
+  const updateWhiteboard = useCanvasStore(s => s.updateWhiteboard);
   
   const store = useMemo(() => createTLStore({ shapeUtils: defaultShapeUtils }), []);
 
@@ -39,7 +42,7 @@ export function WhiteboardCanvas({ boardId, workspaceId, accessToken, userName, 
     
     init();
     return () => disconnect();
-  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize, disconnect, yWhiteboard]);
+  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize, disconnect]);
 
   // Sync Yjs -> Tldraw (Remote updates)
   useEffect(() => {

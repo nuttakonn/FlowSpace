@@ -44,31 +44,29 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
   
-  const {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-    initialize,
-    loadViewportElements,
-    addNode,
-    syncStatus,
-    undo,
-    redo,
-    commitHistory,
-    past,
-    future,
-    saveNodePosition,
-    deleteElements,
-    processQueue,
-    selectAll,
-    updateCursor,
-    remoteUsers,
-    previewNodes,
-    previewEdges,
-    showCurrentInPreview
-  } = useCanvasStore();
+  const nodes = useCanvasStore(s => s.nodes);
+  const edges = useCanvasStore(s => s.edges);
+  const onNodesChange = useCanvasStore(s => s.onNodesChange);
+  const onEdgesChange = useCanvasStore(s => s.onEdgesChange);
+  const onConnect = useCanvasStore(s => s.onConnect);
+  const initialize = useCanvasStore(s => s.initialize);
+  const loadViewportElements = useCanvasStore(s => s.loadViewportElements);
+  const addNode = useCanvasStore(s => s.addNode);
+  const syncStatus = useCanvasStore(s => s.syncStatus);
+  const undo = useCanvasStore(s => s.undo);
+  const redo = useCanvasStore(s => s.redo);
+  const commitHistory = useCanvasStore(s => s.commitHistory);
+  const past = useCanvasStore(s => s.past);
+  const future = useCanvasStore(s => s.future);
+  const saveNodePosition = useCanvasStore(s => s.saveNodePosition);
+  const deleteElements = useCanvasStore(s => s.deleteElements);
+  const processQueue = useCanvasStore(s => s.processQueue);
+  const selectAll = useCanvasStore(s => s.selectAll);
+  const updateCursor = useCanvasStore(s => s.updateCursor);
+  const remoteUsers = useCanvasStore(s => s.remoteUsers);
+  const previewNodes = useCanvasStore(s => s.previewNodes);
+  const previewEdges = useCanvasStore(s => s.previewEdges);
+  const showCurrentInPreview = useCanvasStore(s => s.showCurrentInPreview);
 
   const visibleNodes = showCurrentInPreview ? [...nodes, ...previewNodes] : previewNodes;
   const visibleEdges = showCurrentInPreview ? [...edges, ...previewEdges] : previewEdges;
@@ -82,7 +80,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
 
     window.addEventListener('online', handleOnline);
     return () => window.removeEventListener('online', handleOnline);
-  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize, processQueue]);
+  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize]);
 
   const onPaneMouseMove = useCallback((event: React.MouseEvent) => {
     const position = screenToFlowPosition({

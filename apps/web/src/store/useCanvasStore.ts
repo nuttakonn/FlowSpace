@@ -138,6 +138,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     previewNodes: [], previewEdges: [], aiHistory: [], templates: [], showCurrentInPreview: true,
 
     initialize: (boardId, workspaceId, accessToken, userName, userId, boardType, token) => {
+      const state = get();
+      if (state.boardId === boardId && state.hubConnection?.state === signalR.HubConnectionState.Connected) {
+        return;
+      }
+
+      // Cleanup existing connection if any
+      if (state.hubConnection) {
+        state.hubConnection.stop();
+      }
+
       const yDoc = new Y.Doc();
       const yNodes = yDoc.getMap('nodes');
       const yEdges = yDoc.getMap('edges');
@@ -158,10 +168,36 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         
       const userColor = USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
 
-      set({ boardId, workspaceId, boardType, nodes: [], edges: [], past: [], future: [], mutationQueue: [], syncStatus: 'idle', tempToRealIdMap: {}, clipboard: null, yDoc, yNodes, yEdges, yWhiteboard, hubConnection: connection, remoteUsers: {} });
+      set({ 
+        boardId, 
+        workspaceId, 
+        boardType, 
+        nodes: [], 
+        edges: [], 
+        past: [], 
+        future: [], 
+        mutationQueue: [], 
+        syncStatus: 'idle', 
+        tempToRealIdMap: {}, 
+        clipboard: null, 
+        yDoc, 
+        yNodes, 
+        yEdges, 
+        yWhiteboard, 
+        hubConnection: connection, 
+        remoteUsers: {} 
+      });
 
-      yDoc.on('update', (update) => { if (connection.state === signalR.HubConnectionState.Connected) { connection.invoke('UpdateCanvas', boardId, update); } });
-      connection.on('OnUpdate', (update: Uint8Array) => { Y.applyUpdate(yDoc, update, 'remote'); });
+      yDoc.on('update', (update) => { 
+        if (connection.state === signalR.HubConnectionState.Connected) { 
+          connection.invoke('UpdateCanvas', boardId, update); 
+        } 
+      });
+
+      connection.on('OnUpdate', (update: Uint8Array) => { 
+        Y.applyUpdate(yDoc, update, 'remote'); 
+      });
+
       connection.on('OnAwareness', (awarenessUpdate: Uint8Array) => {
         const state = JSON.parse(new TextDecoder().decode(awarenessUpdate));
         set((s) => ({ remoteUsers: { ...s.remoteUsers, [state.clientId]: state.userState } }));
@@ -174,8 +210,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
       connection.start().then(() => {
         connection.invoke('JoinBoard', boardId, token || null);
-        connection.invoke('SendAwareness', boardId, new TextEncoder().encode(JSON.stringify({ clientId: connection.connectionId, userState: { id: userId, name: userName, color: userColor, selection: [], lastActive: Date.now() } })));
-      }).catch(() => toast.error('Failed to connect to real-time engine'));
+        connection.invoke('SendAwareness', boardId, new TextEncoder().encode(JSON.stringify({ 
+          clientId: connection.connectionId, 
+          userState: { id: userId, name: userName, color: userColor, selection: [], lastActive: Date.now() } 
+        })));
+      }).catch((err) => {
+        console.error('SignalR Connection Error:', err);
+        toast.error('Failed to connect to real-time engine');
+      });
     },
 
     updateCursor: (position) => {
