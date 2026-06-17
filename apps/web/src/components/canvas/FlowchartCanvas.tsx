@@ -11,7 +11,8 @@ import {
   Node,
   Viewport,
   useReactFlow,
-  SelectionMode
+  SelectionMode,
+  ReactFlowProvider
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -31,7 +32,15 @@ interface FlowchartCanvasProps {
   token?: string;
 }
 
-export function FlowchartCanvas({ boardId, workspaceId, accessToken, userName, userId, token }: FlowchartCanvasProps) {
+export function FlowchartCanvas(props: FlowchartCanvasProps) {
+  return (
+    <ReactFlowProvider>
+      <FlowchartCanvasContent {...props} />
+    </ReactFlowProvider>
+  );
+}
+
+function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, userId, token }: FlowchartCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
   

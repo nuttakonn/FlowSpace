@@ -143,11 +143,19 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const yEdges = yDoc.getMap('edges');
       const yWhiteboard = yDoc.getMap('whiteboard');
       
+      const hubUrl = process.env.NEXT_PUBLIC_HUB_URL || 'https://flowspace-api-1kor.onrender.com/hubs/collaboration';
+      const options: signalR.IHttpConnectionOptions = {};
+      
+      if (accessToken) {
+        options.accessTokenFactory = () => accessToken;
+      }
+
       const connection = new signalR.HubConnectionBuilder()
-       .withUrl(`${process.env.NEXT_PUBLIC_HUB_URL || 'https://flowspace-api-1kor.onrender.com/hubs/collaboration'}`, {
-         accessTokenFactory: () => accessToken
-       })
-        .withHubProtocol(new MessagePackHubProtocol()).withAutomaticReconnect().build();
+        .withUrl(hubUrl, options)
+        .withHubProtocol(new MessagePackHubProtocol())
+        .withAutomaticReconnect()
+        .build();
+        
       const userColor = USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
 
       set({ boardId, workspaceId, boardType, nodes: [], edges: [], past: [], future: [], mutationQueue: [], syncStatus: 'idle', tempToRealIdMap: {}, clipboard: null, yDoc, yNodes, yEdges, yWhiteboard, hubConnection: connection, remoteUsers: {} });
