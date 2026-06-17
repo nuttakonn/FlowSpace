@@ -205,7 +205,7 @@ export function ShareDialog({ boardId }: ShareDialogProps) {
                   <div key={p.userId} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-bold text-primary">
-                        {p.displayName.charAt(0).toUpperCase()}
+                        {(p.displayName || p.userEmail || "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="flex flex-col">
                         <span className="text-sm font-bold">{p.displayName}</span>

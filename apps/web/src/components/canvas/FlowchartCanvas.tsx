@@ -228,10 +228,10 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
               <div
                 key={i}
                 className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white shadow-sm"
-                style={{ backgroundColor: user.color }}
-                title={user.name}
+                style={{ backgroundColor: user?.color || '#ccc' }}
+                title={user?.name || 'Guest'}
               >
-                {user.name.charAt(0).toUpperCase()}
+                {(user?.name || 'Guest').charAt(0).toUpperCase()}
               </div>
             ))}
             {Object.values(remoteUsers).length > 5 && (

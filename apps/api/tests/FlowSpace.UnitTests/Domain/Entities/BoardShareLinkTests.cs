@@ -18,7 +18,7 @@ public class BoardShareLinkTests
 
         // Assert
         link.Token.Should().NotBeEmpty();
-        link.Token.Length.Should().Be(22);
+        link.Token.Length.Should().Be(32);
         link.Role.Should().Be(role);
         link.IsRevoked.Should().BeFalse();
     }

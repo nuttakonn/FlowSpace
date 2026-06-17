@@ -157,9 +157,9 @@ app.MapControllers().RequireRateLimiting("GlobalLimit");
 app.MapHub<CollaborationHub>("/hubs/collaboration");
 
 // 4. Start the Application and then Apply Migrations
-// We use RunAsync() to start the host immediately so that Render detects the open port.
-// Then we run migrations in the background.
-var runTask = app.RunAsync();
+// We use StartAsync() to start the host immediately so that Render detects the open port.
+// Then we run migrations in the background before waiting for shutdown.
+await app.StartAsync();
 
 if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
 {
@@ -168,4 +168,4 @@ if (app.Configuration.GetValue<bool>("ApplyMigrationsOnStartup"))
     await dbContext.Database.MigrateAsync();
 }
 
-await runTask;
+await app.WaitForShutdownAsync();
