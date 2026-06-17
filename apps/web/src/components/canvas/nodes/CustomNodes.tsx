@@ -74,7 +74,53 @@ export const CloudNode = memo(({ data, selected }: NodeProps) => {
   );
 });
 
+export const BrowserNode = memo(({ data, selected }: NodeProps) => {
+  const nodeData = data as CustomNodeData;
+  return (
+    <div className={`flex flex-col h-64 w-96 rounded-lg border-2 border-primary bg-background overflow-hidden transition-all ${selected ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+      <div className="h-6 border-b-2 border-primary bg-muted flex items-center px-2 gap-1">
+        <div className="h-2 w-2 rounded-full bg-red-400" />
+        <div className="h-2 w-2 rounded-full bg-yellow-400" />
+        <div className="h-2 w-2 rounded-full bg-green-400" />
+        <div className="ml-2 h-3 w-32 rounded bg-background" />
+      </div>
+      <div className="flex-1 p-4 flex items-center justify-center text-center">
+        <p className="text-sm font-semibold">{nodeData.label || 'Web Browser'}</p>
+      </div>
+      <Handle type="target" position={Position.Top} style={handleStyle} />
+      <Handle type="source" position={Position.Bottom} style={handleStyle} />
+    </div>
+  );
+});
+
+export const StickyNoteNode = memo(({ data, selected }: NodeProps) => {
+  const nodeData = data as CustomNodeData;
+  return (
+    <div className={`flex h-40 w-40 flex-col items-center justify-center bg-yellow-100 shadow-md p-4 text-center transition-all ${selected ? 'ring-2 ring-yellow-400 ring-offset-2' : ''}`}>
+      <p className="text-sm font-medium text-yellow-900 leading-tight">{nodeData.label || 'Take a note...'}</p>
+      <div className="absolute bottom-0 right-0 h-6 w-6 bg-yellow-200" style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }} />
+      <Handle type="target" position={Position.Top} style={handleStyle} />
+      <Handle type="source" position={Position.Bottom} style={handleStyle} />
+    </div>
+  );
+});
+
+export const IconNode = memo(({ data, selected }: NodeProps) => {
+  const nodeData = data as any;
+  const Icon = nodeData.iconComponent;
+  return (
+    <div className={`flex items-center justify-center p-2 rounded-lg border-2 border-transparent transition-all ${selected ? 'border-primary bg-primary/5' : ''}`}>
+       {Icon ? <Icon className="h-10 w-10 text-primary" /> : <Layers className="h-10 w-10" />}
+       <Handle type="target" position={Position.Top} style={handleStyle} />
+       <Handle type="source" position={Position.Bottom} style={handleStyle} />
+    </div>
+  );
+});
+
 DiamondNode.displayName = 'DiamondNode';
 CircleNode.displayName = 'CircleNode';
 DatabaseNode.displayName = 'DatabaseNode';
 CloudNode.displayName = 'CloudNode';
+BrowserNode.displayName = 'BrowserNode';
+StickyNoteNode.displayName = 'StickyNoteNode';
+IconNode.displayName = 'IconNode';

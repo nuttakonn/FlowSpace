@@ -23,13 +23,16 @@ import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
 import { AiSidePanel } from "./AiSidePanel";
 import { FloatingToolbar } from "./FloatingToolbar";
-import { DiamondNode, CircleNode, DatabaseNode, CloudNode } from "./nodes/CustomNodes";
+import { DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode } from "./nodes/CustomNodes";
 
 const nodeTypes = {
   diamond: DiamondNode,
   circle: CircleNode,
   database: DatabaseNode,
-  cloud: CloudNode
+  cloud: CloudNode,
+  browser: BrowserNode,
+  stickynote: StickyNoteNode,
+  icon: IconNode
 };
 
 interface FlowchartCanvasProps {
@@ -128,8 +131,8 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [undo, redo, selectAll]);
 
-  const handleAddNode = (type: string) => {
-    addNode(type, { x: Math.random() * 200, y: Math.random() * 200 });
+  const handleAddNode = (type: string, data?: any) => {
+    addNode(type, { x: Math.random() * 200, y: Math.random() * 200 }, data);
   };
 
   const onNodeDragStart = useCallback(() => {

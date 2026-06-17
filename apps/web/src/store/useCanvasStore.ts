@@ -364,13 +364,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       get().enqueueMutation({ type: 'CREATE_EDGE', tempId, payload: { sourceNodeId: connection.source, targetNodeId: connection.target, metadata: '{}' } });
     },
 
-    addNode: (type, position) => {
+    addNode: (type, position, data) => {
       const { yNodes } = get();
       get().commitHistory();
       const tempId = `temp-${uuidv4()}`;
-      const tempNode: Node = { id: tempId, type: type.toLowerCase(), position, data: { label: `New ${type}` } };
+      const nodeData = { label: `New ${type}`, ...data };
+      const tempNode: Node = { id: tempId, type: type.toLowerCase(), position, data: nodeData };
       yNodes.set(tempId, tempNode);
-      get().enqueueMutation({ type: 'CREATE_NODE', tempId, payload: { type, x: position.x, y: position.y, metadata: JSON.stringify(tempNode.data) } });
+      get().enqueueMutation({ type: 'CREATE_NODE', tempId, payload: { type, x: position.x, y: position.y, metadata: JSON.stringify(nodeData) } });
     },
 
     saveNodePosition: (node) => {
