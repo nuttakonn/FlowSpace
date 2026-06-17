@@ -50,6 +50,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { TemplateGallery } from "@/components/canvas/TemplateGallery";
+
 interface Board {
   id: string;
   workspaceId: string;
@@ -91,13 +93,10 @@ export default function WorkspaceDetailsPage() {
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [activeBoard, setActiveBoard] = useState<Board | null>(null);
+  const [isTemplateGalleryOpen, setIsTemplateGalleryOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   // Forms
-  const createForm = useForm<CreateBoardFormValues>({
-    resolver: zodResolver(createBoardSchema),
-    defaultValues: { name: "", type: "Whiteboard" },
-  });
-
   const renameForm = useForm<RenameBoardFormValues>({
     resolver: zodResolver(renameBoardSchema),
     defaultValues: { name: "" },
@@ -129,15 +128,15 @@ export default function WorkspaceDetailsPage() {
   }, [workspaceId]);
 
   // Handlers
-  const handleCreate = async (data: CreateBoardFormValues) => {
+  const handleCreate = async (template: any, name: string) => {
     try {
+      setIsCreating(true);
       await apiClient.post(`/workspaces/${workspaceId}/boards`, { 
-        name: data.name,
-        type: data.type 
+        name: name,
+        type: template.boardType 
       });
       toast.success("Board created successfully");
-      setIsCreateOpen(false);
-      createForm.reset();
+      setIsTemplateGalleryOpen(false);
       
       // Refresh board list
       const boardsResponse = await apiClient.get<Board[]>(`/workspaces/${workspaceId}/boards`);
@@ -145,6 +144,8 @@ export default function WorkspaceDetailsPage() {
     } catch (err: unknown) {
       const e = err as { response?: { data?: { detail?: string } } };
       toast.error(e.response?.data?.detail || "Failed to create board");
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -239,7 +240,7 @@ export default function WorkspaceDetailsPage() {
           <Button variant="outline">
             <Settings className="mr-2 h-4 w-4" /> Workspace Settings
           </Button>
-          <Button onClick={() => setIsCreateOpen(true)}>
+          <Button onClick={() => setIsTemplateGalleryOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> New Board
           </Button>
         </div>
@@ -259,7 +260,7 @@ export default function WorkspaceDetailsPage() {
               <h3 className="font-medium text-lg">No boards created yet</h3>
               <p className="text-sm text-muted-foreground">Get started by creating your first visual board.</p>
             </div>
-            <Button onClick={() => setIsCreateOpen(true)} className="mt-2">
+            <Button onClick={() => setIsTemplateGalleryOpen(true)} className="mt-2">
               <Plus className="mr-2 h-4 w-4" /> Create Board
             </Button>
           </div>
@@ -310,57 +311,12 @@ export default function WorkspaceDetailsPage() {
         )}
       </div>
 
-      {/* Create Dialog */}
-      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Board</DialogTitle>
-            <DialogDescription>Add a new visual canvas to your workspace.</DialogDescription>
-          </DialogHeader>
-          <form onSubmit={createForm.handleSubmit(handleCreate)}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="create-name">Board Name</Label>
-                <Input id="create-name" {...createForm.register("name")} placeholder="e.g. Architecture Diagram" />
-                {createForm.formState.errors.name && (
-                  <p className="text-sm text-destructive">{createForm.formState.errors.name.message}</p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="create-type">Board Type</Label>
-                <Controller
-                  name="type"
-                  control={createForm.control}
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a board type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {BOARD_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {createForm.formState.errors.type && (
-                  <p className="text-sm text-destructive">{createForm.formState.errors.type.message}</p>
-                )}
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={createForm.formState.isSubmitting}>
-                {createForm.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Board
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <TemplateGallery 
+        isOpen={isTemplateGalleryOpen} 
+        onOpenChange={setIsTemplateGalleryOpen} 
+        onSelect={handleCreate}
+        isSubmitting={isCreating}
+      />
 
       {/* Rename Dialog */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
