@@ -23,7 +23,7 @@ import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
 import { AiSidePanel } from "./AiSidePanel";
 import { FloatingToolbar } from "./FloatingToolbar";
-import { RectangleNode, DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode, TextNode, InfrastructureNode } from "./nodes/CustomNodes";
+import { RectangleNode, DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode, TextNode, InfrastructureNode, ClientNode, MobileNode } from "./nodes/CustomNodes";
 
 const nodeTypes = {
   rectangle: RectangleNode,
@@ -35,7 +35,9 @@ const nodeTypes = {
   stickynote: StickyNoteNode,
   icon: IconNode,
   text: TextNode,
-  infrastructure: InfrastructureNode
+  infrastructure: InfrastructureNode,
+  client: ClientNode,
+  mobile: MobileNode
 };
 
 interface FlowchartCanvasProps {

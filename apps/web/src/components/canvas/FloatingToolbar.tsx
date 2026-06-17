@@ -44,7 +44,14 @@ import {
   RefreshCw,
   MoreHorizontal,
   Box,
-  Server
+  Server,
+  Shield,
+  Activity,
+  Cpu,
+  Container,
+  HardDrive,
+  Network,
+  Smartphone
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -137,20 +144,32 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
   const shapes = [
     { type: 'Rectangle', icon: Square, label: 'Rectangle' },
     { type: 'Circle', icon: Circle, label: 'Circle' },
-    { type: 'Diamond', icon: Diamond, label: 'Diamond' },
+    { type: 'Diamond', icon: Diamond, label: 'Decision' },
     { type: 'Database', icon: Database, label: 'Database' },
-    { type: 'Cloud', icon: Cloud, label: 'Cloud' },
-  ];
-
-  const wireframes = [
-    { type: 'Browser', icon: Monitor, label: 'Browser' },
-    { type: 'StickyNote', icon: StickyNote, label: 'Sticky Note' },
+    { type: 'Cloud', icon: Cloud, label: 'General Cloud' },
   ];
 
   const infrastructure = [
-    { type: 'Infrastructure', label: 'AWS', icon: Cloud, data: { color: 'bg-orange-500/10 text-orange-600', label: 'AWS Service' } },
-    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, data: { color: 'bg-blue-500/10 text-blue-600', label: 'K8s Cluster' } },
-    { type: 'Infrastructure', label: 'Server', icon: Server, data: { color: 'bg-slate-500/10 text-slate-600', label: 'Bare Metal' } },
+    { type: 'Infrastructure', label: 'AWS', icon: Cloud, data: { color: 'bg-orange-500/10 text-orange-600', sublabel: 'Cloud Service' } },
+    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, data: { color: 'bg-blue-500/10 text-blue-600', sublabel: 'Cluster' } },
+    { type: 'Infrastructure', label: 'Docker', icon: Container, data: { color: 'bg-cyan-500/10 text-cyan-600', sublabel: 'Container' } },
+    { type: 'Infrastructure', label: 'Server', icon: Server, data: { color: 'bg-slate-500/10 text-slate-600', sublabel: 'Compute' } },
+    { type: 'Infrastructure', label: 'Load Balancer', icon: Network, data: { color: 'bg-indigo-500/10 text-indigo-600', sublabel: 'Network' } },
+    { type: 'Infrastructure', label: 'Firewall', icon: Shield, data: { color: 'bg-red-500/10 text-red-600', sublabel: 'Security' } },
+    { type: 'Infrastructure', label: 'API Gateway', icon: Zap, data: { color: 'bg-yellow-500/10 text-yellow-600', sublabel: 'API' } },
+    { type: 'Infrastructure', label: 'Function', icon: Cpu, data: { color: 'bg-pink-500/10 text-pink-600', sublabel: 'Lambda' } },
+    { type: 'Infrastructure', label: 'Kafka', icon: Activity, data: { color: 'bg-purple-500/10 text-purple-600', sublabel: 'Streaming' } },
+    { type: 'Infrastructure', label: 'Storage', icon: HardDrive, data: { color: 'bg-emerald-500/10 text-emerald-600', sublabel: 'S3/EBS' } },
+  ];
+
+  const devices = [
+    { type: 'Client', icon: User, label: 'User' },
+    { type: 'Mobile', icon: Smartphone, label: 'Mobile App' },
+    { type: 'Browser', icon: Monitor, label: 'Web App' },
+  ];
+
+  const wireframes = [
+    { type: 'StickyNote', icon: StickyNote, label: 'Sticky Note' },
   ];
 
   const filteredIcons = ICON_LIST.filter(i => i.name.toLowerCase().includes(iconSearch.toLowerCase()));
@@ -175,59 +194,85 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
           <div className="relative">
             <ToolbarButton 
               icon={Plus} 
-              label="Add Shape" 
-              isActive={['Rectangle', 'Circle', 'Diamond', 'Database', 'Cloud', 'Infrastructure'].includes(activeTool)}
+              label="Add Content" 
+              isActive={['Rectangle', 'Circle', 'Diamond', 'Database', 'Cloud', 'Infrastructure', 'Browser', 'StickyNote'].includes(activeTool)}
             />
           </div>
         </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="w-56 p-2 flex flex-col gap-1">
-          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Basic Shapes</p>
-          {shapes.map((shape) => (
-            <Button
-              key={shape.type}
-              variant="ghost"
-              className="justify-start h-9 px-2 gap-3"
-              onClick={() => {
-                onAddNode(shape.type);
-                setActiveTool(shape.type);
-              }}
-            >
-              <shape.icon className="h-4 w-4" />
-              <span className="text-sm font-medium">{shape.label}</span>
-            </Button>
-          ))}
-          
-          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-2">Infrastructure</p>
-          {infrastructure.map((infra) => (
-            <Button
-              key={infra.label}
-              variant="ghost"
-              className="justify-start h-9 px-2 gap-3"
-              onClick={() => {
-                onAddNode(infra.type, { ...infra.data, iconComponent: infra.icon });
-                setActiveTool(infra.type);
-              }}
-            >
-              <infra.icon className="h-4 w-4" />
-              <span className="text-sm font-medium">{infra.label}</span>
-            </Button>
-          ))}
+        <PopoverContent side="right" align="start" className="w-64 p-0 flex flex-col overflow-hidden max-h-[80vh]">
+          <ScrollArea className="flex-1">
+            <div className="p-2 flex flex-col gap-1">
+              <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Basic Shapes</p>
+              {shapes.map((shape) => (
+                <Button
+                  key={shape.type}
+                  variant="ghost"
+                  className="justify-start h-9 px-2 gap-3"
+                  onClick={() => {
+                    onAddNode(shape.type);
+                    setActiveTool(shape.type);
+                  }}
+                >
+                  <shape.icon className="h-4 w-4" />
+                  <span className="text-sm font-medium">{shape.label}</span>
+                </Button>
+              ))}
+              
+              <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Devices & Apps</p>
+          <div className="grid grid-cols-2 gap-1 px-1">
+            {devices.map((device) => (
+                <Button
+                key={device.label}
+                variant="ghost"
+                size="sm"
+                className="flex flex-col h-16 gap-1 p-2"
+                onClick={() => {
+                    onAddNode(device.type);
+                    setActiveTool(device.type);
+                }}
+                >
+                <device.icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium text-center leading-none">{device.label}</span>
+                </Button>
+            ))}
+          </div>
 
-          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-2">Wireframes</p>
-          {wireframes.map((wf) => (
-            <Button
-              key={wf.type}
-              variant="ghost"
-              className="justify-start h-9 px-2 gap-3"
-              onClick={() => {
-                onAddNode(wf.type);
-                setActiveTool(wf.type);
-              }}
-            >
-              <wf.icon className="h-4 w-4" />
-              <span className="text-sm font-medium">{wf.label}</span>
-            </Button>
-          ))}
+          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Infrastructure</p>
+              <div className="grid grid-cols-2 gap-1 px-1">
+                {infrastructure.map((infra) => (
+                    <Button
+                    key={infra.label}
+                    variant="ghost"
+                    size="sm"
+                    className="flex flex-col h-16 gap-1 p-2"
+                    onClick={() => {
+                        onAddNode(infra.type, { ...infra.data, iconComponent: infra.icon, label: infra.label });
+                        setActiveTool(infra.type);
+                    }}
+                    >
+                    <infra.icon className={cn("h-5 w-5", infra.data.color.split(' ')[1])} />
+                    <span className="text-[10px] font-medium text-center leading-none">{infra.label}</span>
+                    </Button>
+                ))}
+              </div>
+
+              <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Wireframes</p>
+              {wireframes.map((wf) => (
+                <Button
+                  key={wf.type}
+                  variant="ghost"
+                  className="justify-start h-9 px-2 gap-3"
+                  onClick={() => {
+                    onAddNode(wf.type);
+                    setActiveTool(wf.type);
+                  }}
+                >
+                  <wf.icon className="h-4 w-4" />
+                  <span className="text-sm font-medium">{wf.label}</span>
+                </Button>
+              ))}
+            </div>
+          </ScrollArea>
         </PopoverContent>
       </Popover>
 
@@ -236,7 +281,7 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
           <div className="relative">
             <ToolbarButton 
               icon={MoreHorizontal} 
-              label="Icons" 
+              label="Icons Library" 
               isActive={activeTool === 'icon'}
             />
           </div>
@@ -262,7 +307,7 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
                   size="icon"
                   className="h-12 w-12"
                   onClick={() => {
-                    onAddNode('Icon', { iconComponent: item.icon });
+                    onAddNode('Icon', { iconComponent: item.icon, label: '' });
                     setActiveTool('icon');
                   }}
                   title={item.name}
@@ -277,7 +322,7 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
 
       <ToolbarButton 
         icon={Type} 
-        label="Text (T)" 
+        label="Text Tool (T)" 
         isActive={activeTool === 'text'} 
         onClick={() => {
             onAddNode('Text');
