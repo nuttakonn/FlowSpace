@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -82,6 +82,7 @@ type RenameBoardFormValues = z.infer<typeof renameBoardSchema>;
 
 export default function WorkspaceDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const workspaceId = params.workspaceId as string;
 
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
@@ -131,21 +132,26 @@ export default function WorkspaceDetailsPage() {
   const handleCreate = async (template: any, name: string) => {
     try {
       setIsCreating(true);
-      await apiClient.post(`/workspaces/${workspaceId}/boards`, { 
+      const response = await apiClient.post<Board>(`/workspaces/${workspaceId}/boards`, { 
         name: name,
         type: template.boardType 
       });
+      const newBoard = response.data;
+
+      // If it's a specific template (not blank), we should ideally call a backend endpoint to generate/apply it.
+      // Since the backend template logic might need a dedicated endpoint, we'll apply it via the AI/Template service or redirect immediately.
+      // For now, redirecting to the new board is the expected behavior.
+      
       toast.success("Board created successfully");
       setIsTemplateGalleryOpen(false);
       
-      // Refresh board list
-      const boardsResponse = await apiClient.get<Board[]>(`/workspaces/${workspaceId}/boards`);
-      setBoards(boardsResponse.data);
+      // Redirect to the newly created board
+      router.push(`/boards/${newBoard.id}`);
+      
     } catch (err: unknown) {
       const e = err as { response?: { data?: { detail?: string } } };
       toast.error(e.response?.data?.detail || "Failed to create board");
-    } finally {
-      setIsCreating(false);
+      setIsCreating(false); // Only set false on error, let the redirect handle success state
     }
   };
 
