@@ -174,167 +174,207 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
 
   const filteredIcons = ICON_LIST.filter(i => i.name.toLowerCase().includes(iconSearch.toLowerCase()));
 
+  const [expandedSection, setExpandedSection] = useState<string | null>('basic');
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(prev => prev === section ? null : section);
+  };
+
   return (
     <motion.div 
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className={cn("flex flex-col gap-2 p-2 bg-background/80 backdrop-blur border rounded-xl shadow-lg", className)}
+      className={cn("flex flex-col bg-background/95 backdrop-blur-xl border-r shadow-2xl h-full w-72 flex-shrink-0 z-20 pointer-events-auto", className)}
     >
-      <ToolbarButton 
-        icon={MousePointer2} 
-        label="Select (V)" 
-        isActive={activeTool === 'select'} 
-        onClick={() => setActiveTool('select')} 
-      />
-      
-      <div className="h-px bg-border mx-2" />
+      {/* Top action bar */}
+      <div className="flex items-center gap-1 p-3 border-b bg-muted/20">
+        <ToolbarButton 
+          icon={MousePointer2} 
+          label="Select (V)" 
+          isActive={activeTool === 'select'} 
+          onClick={() => setActiveTool('select')} 
+          className="flex-1 h-9"
+        />
+        <ToolbarButton 
+          icon={Type} 
+          label="Text (T)" 
+          isActive={activeTool === 'text'} 
+          onClick={() => {
+              onAddNode('Text');
+              setActiveTool('text');
+          }} 
+          className="flex-1 h-9"
+        />
+        <ToolbarButton 
+          icon={ArrowUpRight} 
+          label="Connector (C)" 
+          isActive={activeTool === 'connector'} 
+          onClick={() => setActiveTool('connector')} 
+          className="flex-1 h-9"
+        />
+      </div>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <div className="relative">
-            <ToolbarButton 
-              icon={Plus} 
-              label="Add Content" 
-              isActive={['Rectangle', 'Circle', 'Diamond', 'Database', 'Cloud', 'Infrastructure', 'Browser', 'StickyNote'].includes(activeTool)}
-            />
-          </div>
-        </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="w-64 p-0 flex flex-col overflow-hidden max-h-[80vh]">
-          <ScrollArea className="flex-1">
-            <div className="p-2 flex flex-col gap-1">
-              <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider">Basic Shapes</p>
-              {shapes.map((shape) => (
-                <Button
-                  key={shape.type}
-                  variant="ghost"
-                  className="justify-start h-9 px-2 gap-3"
-                  onClick={() => {
-                    onAddNode(shape.type);
-                    setActiveTool(shape.type);
-                  }}
-                >
-                  <shape.icon className="h-4 w-4" />
-                  <span className="text-sm font-medium">{shape.label}</span>
-                </Button>
-              ))}
-              
-              <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Devices & Apps</p>
-          <div className="grid grid-cols-2 gap-1 px-1">
-            {devices.map((device) => (
-                <Button
-                key={device.label}
-                variant="ghost"
-                size="sm"
-                className="flex flex-col h-16 gap-1 p-2"
-                onClick={() => {
-                    onAddNode(device.type);
-                    setActiveTool(device.type);
-                }}
-                >
-                <device.icon className="h-5 w-5" />
-                <span className="text-[10px] font-medium text-center leading-none">{device.label}</span>
-                </Button>
-            ))}
+      <ScrollArea className="flex-1">
+        <div className="flex flex-col">
+          {/* Basic Shapes Accordion */}
+          <div className="border-b">
+            <button 
+              className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
+              onClick={() => toggleSection('basic')}
+            >
+              Basic Shapes
+              <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'basic' ? "rotate-45" : "")} />
+            </button>
+            {expandedSection === 'basic' && (
+              <div className="grid grid-cols-3 gap-2 p-3 pt-0 bg-muted/10">
+                {shapes.map((shape) => (
+                  <Button
+                    key={shape.type}
+                    variant="outline"
+                    className="flex flex-col h-16 gap-1 p-2 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm"
+                    onClick={() => {
+                      onAddNode(shape.type);
+                      setActiveTool(shape.type);
+                    }}
+                    title={shape.label}
+                  >
+                    <shape.icon className="h-5 w-5 text-foreground" />
+                    <span className="text-[9px] font-semibold tracking-tighter truncate w-full">{shape.label}</span>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Infrastructure</p>
-          <div className="grid grid-cols-2 gap-1 px-1">
-            {infrastructure.map((infra) => (
-                <Button
-                key={infra.label}
-                variant="ghost"
-                size="sm"
-                className="flex flex-col h-16 gap-1 p-2"
-                onClick={() => {
-                    onAddNode(infra.type, { ...infra.data, iconName: infra.iconName, label: infra.label });
-                    setActiveTool(infra.type);
-                }}
-                >
-                <infra.icon className={cn("h-5 w-5", infra.data.color.split(' ')[1])} />
-                <span className="text-[10px] font-medium text-center leading-none">{infra.label}</span>
-                </Button>
-            ))}
+          {/* Wireframes Accordion */}
+          <div className="border-b">
+            <button 
+              className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
+              onClick={() => toggleSection('wireframes')}
+            >
+              Wireframes
+              <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'wireframes' ? "rotate-45" : "")} />
+            </button>
+            {expandedSection === 'wireframes' && (
+              <div className="grid grid-cols-2 gap-2 p-3 pt-0 bg-muted/10">
+                {wireframes.map((wf) => (
+                  <Button
+                    key={wf.type}
+                    variant="outline"
+                    className="flex items-center justify-start h-12 gap-3 px-3 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm"
+                    onClick={() => {
+                      onAddNode(wf.type);
+                      setActiveTool(wf.type);
+                    }}
+                  >
+                    <wf.icon className="h-5 w-5 text-foreground" />
+                    <span className="text-xs font-semibold">{wf.label}</span>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
-              <p className="text-[10px] font-bold text-muted-foreground px-2 py-1 uppercase tracking-wider mt-3">Wireframes</p>
-              {wireframes.map((wf) => (
-                <Button
-                  key={wf.type}
-                  variant="ghost"
-                  className="justify-start h-9 px-2 gap-3"
-                  onClick={() => {
-                    onAddNode(wf.type);
-                    setActiveTool(wf.type);
-                  }}
-                >
-                  <wf.icon className="h-4 w-4" />
-                  <span className="text-sm font-medium">{wf.label}</span>
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
-        </PopoverContent>
-      </Popover>
 
-      <Popover>
-        <PopoverTrigger asChild>
-          <div className="relative">
-            <ToolbarButton 
-              icon={MoreHorizontal} 
-              label="Icons Library" 
-              isActive={activeTool === 'icon'}
-            />
+          {/* Devices Accordion */}
+          <div className="border-b">
+            <button 
+              className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
+              onClick={() => toggleSection('devices')}
+            >
+              Devices & Users
+              <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'devices' ? "rotate-45" : "")} />
+            </button>
+            {expandedSection === 'devices' && (
+              <div className="grid grid-cols-2 gap-2 p-3 pt-0 bg-muted/10">
+                {devices.map((device) => (
+                  <Button
+                    key={device.label}
+                    variant="outline"
+                    className="flex flex-col h-16 gap-1 p-2 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm"
+                    onClick={() => {
+                        onAddNode(device.type);
+                        setActiveTool(device.type);
+                    }}
+                  >
+                    <device.icon className="h-5 w-5 text-foreground" />
+                    <span className="text-[10px] font-bold text-center leading-none">{device.label}</span>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
-        </PopoverTrigger>
-        <PopoverContent side="right" align="start" className="w-64 p-0 flex flex-col overflow-hidden">
-          <div className="p-2 border-b">
-            <div className="relative">
-              <Search className="absolute left-2 top-2.5 h-3 w-3 text-muted-foreground" />
-              <Input 
-                placeholder="Search icons..." 
-                className="h-8 pl-7 text-xs" 
-                value={iconSearch}
-                onChange={(e) => setIconSearch(e.target.value)}
-              />
-            </div>
+
+          {/* Infrastructure Accordion */}
+          <div className="border-b">
+            <button 
+              className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
+              onClick={() => toggleSection('infra')}
+            >
+              Infrastructure
+              <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'infra' ? "rotate-45" : "")} />
+            </button>
+            {expandedSection === 'infra' && (
+              <div className="grid grid-cols-2 gap-2 p-3 pt-0 bg-muted/10">
+                {infrastructure.map((infra) => (
+                    <Button
+                    key={infra.label}
+                    variant="outline"
+                    className="flex flex-col h-16 gap-1.5 p-2 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm group"
+                    onClick={() => {
+                        onAddNode(infra.type, { ...infra.data, iconName: infra.iconName, label: infra.label });
+                        setActiveTool(infra.type);
+                    }}
+                    >
+                    <infra.icon className={cn("h-6 w-6 transition-transform group-hover:scale-110", infra.data.color.split(' ')[1])} />
+                    <span className="text-[10px] font-bold text-center leading-none text-muted-foreground group-hover:text-foreground">{infra.label}</span>
+                    </Button>
+                ))}
+              </div>
+            )}
           </div>
-          <ScrollArea className="h-64 p-2">
-            <div className="grid grid-cols-4 gap-1">
-              {filteredIcons.map((item) => (
-                <Button
-                  key={item.name}
-                  variant="ghost"
-                  size="icon"
-                  className="h-12 w-12"
-                  onClick={() => {
-                    onAddNode('Icon', { iconName: item.iconName, label: '' });
-                    setActiveTool('icon');
-                  }}
-                  title={item.name}
-                >
-                  <item.icon className="h-5 w-5" />
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
-        </PopoverContent>
-      </Popover>
 
-      <ToolbarButton 
-        icon={Type} 
-        label="Text Tool (T)" 
-        isActive={activeTool === 'text'} 
-        onClick={() => {
-            onAddNode('Text');
-            setActiveTool('text');
-        }} 
-      />
-
-      <ToolbarButton 
-        icon={ArrowUpRight} 
-        label="Connector (C)" 
-        isActive={activeTool === 'connector'} 
-        onClick={() => setActiveTool('connector')} 
-      />
+          {/* Icons Accordion */}
+          <div className="border-b">
+            <button 
+              className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
+              onClick={() => toggleSection('icons')}
+            >
+              Icon Library
+              <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'icons' ? "rotate-45" : "")} />
+            </button>
+            {expandedSection === 'icons' && (
+              <div className="p-3 pt-0 bg-muted/10 space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    placeholder="Search icons..." 
+                    className="h-9 pl-8 text-xs bg-background" 
+                    value={iconSearch}
+                    onChange={(e) => setIconSearch(e.target.value)}
+                  />
+                </div>
+                <div className="grid grid-cols-5 gap-1">
+                  {filteredIcons.map((item) => (
+                    <Button
+                      key={item.name}
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 bg-background border hover:border-primary/50 hover:bg-primary/5 shadow-sm"
+                      onClick={() => {
+                        onAddNode('Icon', { iconName: item.iconName, label: '' });
+                        setActiveTool('icon');
+                      }}
+                      title={item.name}
+                    >
+                      <item.icon className="h-4 w-4" />
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </ScrollArea>
     </motion.div>
   );
 }
