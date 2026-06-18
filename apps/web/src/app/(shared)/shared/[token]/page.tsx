@@ -6,7 +6,6 @@ import { Globe, Lock, ShieldCheck, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { FlowchartCanvas } from "@/components/canvas/FlowchartCanvas";
-import { WhiteboardCanvas } from "@/components/canvas/WhiteboardCanvas";
 import { Badge } from "@/components/ui/badge";
 
 interface Board {
@@ -85,25 +84,14 @@ export default function SharedBoardPage() {
 
       <main className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0">
-          {board.type === "Whiteboard" ? (
-            <WhiteboardCanvas 
-              boardId={board.id} 
-              workspaceId={board.workspaceId} 
-              accessToken="" 
-              userName="Guest" 
-              userId={guestId} 
-              token={token} 
-            />
-          ) : (
-            <FlowchartCanvas 
-              boardId={board.id} 
-              workspaceId={board.workspaceId} 
-              accessToken="" 
-              userName="Guest" 
-              userId={guestId} 
-              token={token} 
-            />
-          )}
+          <FlowchartCanvas 
+            boardId={board.id} 
+            workspaceId={board.workspaceId} 
+            accessToken="" 
+            userName="Guest Viewer" 
+            userId="guest" 
+            token={token}
+          />
         </div>
       </main>
     </div>

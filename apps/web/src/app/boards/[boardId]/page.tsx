@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { FlowchartCanvas } from "@/components/canvas/FlowchartCanvas";
-import { WhiteboardCanvas } from "@/components/canvas/WhiteboardCanvas";
 import { ShareDialog } from "@/components/canvas/ShareDialog";
 
 interface Board {
@@ -106,25 +105,14 @@ export default function BoardEditorPage() {
 
       <main className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0">
-          {board.type === "Whiteboard" ? (
-            <WhiteboardCanvas 
-              boardId={board.id} 
-              workspaceId={board.workspaceId} 
-              accessToken={accessToken || ""} 
-              userName={user?.displayName || "Guest"} 
-              userId={user?.id || "guest"} 
-              token={shareToken}
-            />
-          ) : (
-            <FlowchartCanvas 
-              boardId={board.id} 
-              workspaceId={board.workspaceId} 
-              accessToken={accessToken || ""} 
-              userName={user?.displayName || "Guest"} 
-              userId={user?.id || "guest"} 
-              token={shareToken}
-            />
-          )}
+          <FlowchartCanvas 
+            boardId={board.id} 
+            workspaceId={board.workspaceId} 
+            accessToken={accessToken || ""} 
+            userName={user?.displayName || "Guest"} 
+            userId={user?.id || "guest"} 
+            token={shareToken}
+          />
         </div>
       </main>
     </div>
