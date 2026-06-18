@@ -132,9 +132,10 @@ const USER_COLORS = ['#ef4444', '#f97316', '#f59e0b', '#10b981', '#06b6d4', '#3b
 export const useCanvasStore = create<CanvasState>((set, get) => {
   const debouncedProcessQueue = debounce(() => { get().processQueue(); }, 500);
 
+  const yDoc = new Y.Doc();
   return {
     nodes: [], edges: [], boardId: null, workspaceId: null, boardType: null, isLoading: false, past: [], future: [], mutationQueue: [], syncStatus: 'idle',
-    tempToRealIdMap: {}, clipboard: null, yDoc: new Y.Doc(), yNodes: new Y.Doc().getMap('nodes'), yEdges: new Y.Doc().getMap('edges'), yWhiteboard: new Y.Doc().getMap('whiteboard'),
+    tempToRealIdMap: {}, clipboard: null, yDoc, yNodes: yDoc.getMap('nodes'), yEdges: yDoc.getMap('edges'), yWhiteboard: yDoc.getMap('whiteboard'),
     hubConnection: null, remoteUsers: {}, isGeneratingAi: false, aiStatus: '',
     previewNodes: [], previewEdges: [], aiHistory: [], templates: [], showCurrentInPreview: true,
 
@@ -204,10 +205,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         set((s) => ({ remoteUsers: { ...s.remoteUsers, [state.clientId]: state.userState } }));
       });
       
-      if (boardType !== 'Whiteboard') {
-        yNodes.observe(() => { set({ nodes: Array.from(yNodes.values()).map(n => n as Node) }); });
-        yEdges.observe(() => { set({ edges: Array.from(yEdges.values()).map(e => e as Edge) }); });
-      }
+      // Observe all node and edge changes regardless of boardType since we've unified the canvas engine
+      yNodes.observe(() => { 
+        const updatedNodes = Array.from(yNodes.values()).map(n => n as Node);
+        console.log('Nodes updated in Yjs:', updatedNodes.length);
+        set({ nodes: updatedNodes }); 
+      });
+      
+      yEdges.observe(() => { 
+        const updatedEdges = Array.from(yEdges.values()).map(e => e as Edge);
+        console.log('Edges updated in Yjs:', updatedEdges.length);
+        set({ edges: updatedEdges }); 
+      });
 
       connection.start().then(() => {
         connection.invoke('JoinBoard', boardId, token || null);
@@ -382,6 +391,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
     addNode: (type, position, data) => {
       const { yNodes } = get();
+      console.log('Adding node of type:', type, 'at position:', position);
       get().commitHistory();
       const tempId = `temp-${uuidv4()}`;
       const nodeData = { label: `New ${type}`, ...data };

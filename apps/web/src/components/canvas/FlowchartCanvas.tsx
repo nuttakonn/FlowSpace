@@ -170,7 +170,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
   }, [loadViewportElements]);
 
   return (
-    <div ref={wrapperRef} style={{ width: "100%", height: "100%" }}>
+    <div ref={wrapperRef} className="absolute inset-0 overflow-hidden bg-background">
       <ReactFlow
         nodes={visibleNodes}
         edges={visibleEdges}
