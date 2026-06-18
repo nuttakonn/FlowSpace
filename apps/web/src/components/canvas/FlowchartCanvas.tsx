@@ -89,6 +89,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
   const visibleEdges = showCurrentInPreview ? [...edges, ...previewEdges] : previewEdges;
 
   useEffect(() => {
+    console.log("🚀 FlowSpace Engine v2.5 Initializing Board:", boardId);
     initialize(boardId, workspaceId, accessToken, userName, userId, "Flowchart", token);
 
     const handleOnline = () => {
@@ -97,7 +98,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
 
     window.addEventListener('online', handleOnline);
     return () => window.removeEventListener('online', handleOnline);
-  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize]);
+  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize, processQueue]);
 
   const onPaneMouseMove = useCallback((event: React.MouseEvent) => {
     const position = screenToFlowPosition({
