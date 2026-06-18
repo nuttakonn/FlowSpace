@@ -74,7 +74,7 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1200px] w-[95vw] h-[90vh] p-0 overflow-hidden bg-background border-none shadow-2xl">
+      <DialogContent className="w-[95vw] h-[90vh] p-0 overflow-hidden bg-background border-none shadow-2xl">
         <DialogTitle className="sr-only">Choose a template</DialogTitle>
         <DialogDescription className="sr-only">Select a template to kickstart your workflow.</DialogDescription>
         
