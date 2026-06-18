@@ -74,26 +74,24 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[1200px] w-[95vw] h-[90vh] md:h-[85vh] p-0 gap-0 overflow-hidden bg-background">
+      <DialogContent className="max-w-[1200px] w-[95vw] h-[90vh] p-0 overflow-hidden bg-background border-none shadow-2xl">
         <DialogTitle className="sr-only">Choose a template</DialogTitle>
         <DialogDescription className="sr-only">Select a template to kickstart your workflow.</DialogDescription>
         
-        {/* Strict CSS Grid Layout to fix Safari flexbox collapse bugs */}
-        <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] lg:grid-cols-[280px_1fr] h-full w-full">
-          
-          {/* Sidebar */}
-          <aside className="border-b md:border-b-0 md:border-r bg-muted/10 flex flex-col h-full overflow-hidden">
-            <div className="p-4 md:p-6 pb-2 hidden md:block">
-              <h2 className="text-xl font-bold tracking-tight">FlowSpace</h2>
-              <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest mt-1">Template Library</p>
+        <div className="flex h-full w-full overflow-hidden">
+          {/* Fixed Sidebar - No shrinking allowed */}
+          <div style={{ width: '280px', minWidth: '280px' }} className="hidden lg:flex flex-col border-r bg-muted/10 h-full overflow-hidden">
+            <div className="p-8 pb-4">
+              <h2 className="text-2xl font-bold tracking-tight text-primary">FlowSpace</h2>
+              <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">Template Library</p>
             </div>
             
-            <div className="p-4 md:pt-2">
+            <div className="p-6 pt-0">
               <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="Search templates..." 
-                  className="pl-9 h-9 bg-background" 
+                  className="pl-10 h-11 bg-background border-2 rounded-xl focus-visible:ring-primary/20" 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -101,113 +99,135 @@ export function TemplateGallery({ isOpen, onOpenChange, onSelect, isSubmitting }
             </div>
 
             <ScrollArea className="flex-1 px-4">
-              <div className="flex flex-row md:flex-col gap-2 py-2 pb-4 md:pb-2">
-                <p className="hidden md:block px-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground py-2">Categories</p>
+              <div className="space-y-1.5 py-4">
+                <p className="px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">Categories</p>
                 {CATEGORIES.map(cat => (
                   <Button
                     key={cat}
                     variant={selectedCategory === cat ? "secondary" : "ghost"}
                     className={cn(
-                      "flex-shrink-0 md:w-full justify-start h-10 px-4 md:px-3 gap-3 transition-colors rounded-full md:rounded-md whitespace-nowrap border md:border-transparent",
-                      selectedCategory === cat ? "bg-primary/10 text-primary hover:bg-primary/15 border-primary/20 shadow-sm" : "border-border/50 bg-background md:bg-transparent"
+                      "w-full justify-start h-11 px-3 gap-4 transition-all rounded-xl",
+                      selectedCategory === cat ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md" : "hover:bg-primary/5"
                     )}
                     onClick={() => setSelectedCategory(cat)}
                   >
-                    <span className="hidden md:inline-flex">
-                      {cat === 'All' && <Layout className="h-4 w-4" />}
-                      {cat === 'Whiteboarding' && <Layers className="h-4 w-4" />}
-                      {cat === 'Diagrams' && <Workflow className="h-4 w-4" />}
-                      {cat === 'Architecture' && <Database className="h-4 w-4" />}
-                      {cat === 'Management' && <Users className="h-4 w-4" />}
-                    </span>
-                    <span className="text-sm font-medium">{cat}</span>
+                    {cat === 'All' && <Layout className="h-4 w-4" />}
+                    {cat === 'Whiteboarding' && <Layers className="h-4 w-4" />}
+                    {cat === 'Diagrams' && <Workflow className="h-4 w-4" />}
+                    {cat === 'Architecture' && <Database className="h-4 w-4" />}
+                    {cat === 'Management' && <Users className="h-4 w-4" />}
+                    <span className="text-sm font-bold">{cat}</span>
                   </Button>
                 ))}
               </div>
             </ScrollArea>
 
-            <div className="p-4 border-t bg-muted/10 hidden md:block mt-auto">
-              <Button variant="ghost" className="w-full justify-start gap-3 h-10 text-muted-foreground" onClick={() => onOpenChange(false)}>
+            <div className="p-6 border-t bg-muted/10">
+              <Button variant="outline" className="w-full justify-center h-11 rounded-xl font-bold" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
             </div>
-          </aside>
+          </div>
 
-          {/* Main Gallery */}
-          <main className="flex flex-col bg-muted/5 h-full overflow-hidden relative">
-            <div className="p-4 md:p-6 lg:p-8 pb-4 bg-background/50 backdrop-blur sticky top-0 z-10 border-b md:border-none">
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-extrabold tracking-tight text-foreground">Choose a template</h1>
-              <p className="text-sm text-muted-foreground mt-1">Kickstart your workflow with a pre-built canvas.</p>
+          {/* Main Content Area - Fill remaining space */}
+          <div className="flex-1 flex flex-col min-w-0 bg-background h-full overflow-hidden relative">
+            <div className="p-8 lg:p-10 pb-6 border-b lg:border-none flex-shrink-0">
+              <h1 className="text-3xl lg:text-4xl font-black tracking-tight text-foreground">Choose a template</h1>
+              <p className="text-base text-muted-foreground mt-2">Start your next big project with a professional foundation.</p>
+              
+              {/* Mobile Category Search (visible only on small screens) */}
+              <div className="mt-6 flex flex-col gap-4 lg:hidden">
+                 <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                    placeholder="Search..." 
+                    className="pl-10 h-11 bg-muted/30" 
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    />
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {CATEGORIES.map(cat => (
+                        <Button
+                            key={cat}
+                            variant={selectedCategory === cat ? "secondary" : "outline"}
+                            size="sm"
+                            className={cn("rounded-full px-4 h-9", selectedCategory === cat ? "bg-primary text-primary-foreground" : "")}
+                            onClick={() => setSelectedCategory(cat)}
+                        >
+                            {cat}
+                        </Button>
+                    ))}
+                </div>
+              </div>
             </div>
 
-            <ScrollArea className="flex-1 px-4 md:px-6 lg:px-8 py-4">
-              <motion.div 
-                layout
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6 pb-8"
-              >
-                <AnimatePresence>
+            <ScrollArea className="flex-1 px-8 lg:px-10 py-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 pb-12">
+                <AnimatePresence mode="popLayout">
                   {filteredTemplates.map((template) => (
                     <motion.div
                       key={template.id}
                       layout
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      whileHover={{ y: -4 }}
+                      whileHover={{ y: -8 }}
                       className={cn(
-                        "group relative flex flex-col rounded-2xl border-2 cursor-pointer transition-all duration-300",
-                        selectedTemplate?.id === template.id ? "border-primary bg-primary/5 shadow-lg shadow-primary/5" : "bg-card hover:border-primary/30 hover:shadow-xl"
+                        "group relative flex flex-col rounded-[1.5rem] border-2 cursor-pointer transition-all duration-300 overflow-hidden",
+                        selectedTemplate?.id === template.id ? "border-primary bg-primary/5 shadow-2xl ring-2 ring-primary/20" : "border-border/50 bg-card hover:border-primary/50 hover:shadow-xl"
                       )}
                       onClick={() => {
                           setSelectedTemplate(template);
                           setBoardName(prev => prev || template.name);
                       }}
                     >
-                      <div className={cn("aspect-video w-full rounded-t-xl flex items-center justify-center relative overflow-hidden flex-shrink-0", template.previewColor)}>
-                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <template.icon className="h-12 w-12 md:h-16 md:w-12 text-white/90 drop-shadow-lg md:drop-shadow-2xl md:scale-125" />
+                      <div className={cn("aspect-[16/10] w-full flex items-center justify-center relative overflow-hidden flex-shrink-0 transition-transform duration-500 group-hover:scale-105", template.previewColor)}>
+                          <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <template.icon className="h-20 w-16 text-white drop-shadow-2xl opacity-90" />
                       </div>
-                      <div className="p-4 md:p-5 flex-1 bg-card rounded-b-xl">
-                          <h3 className="font-bold text-sm md:text-base leading-none mb-1 md:mb-2 text-foreground">{template.name}</h3>
-                          <p className="text-[10px] md:text-xs text-muted-foreground leading-relaxed line-clamp-2">{template.description}</p>
+                      <div className="p-6 flex-1 flex flex-col">
+                          <h3 className="font-bold text-lg leading-tight mb-2 text-foreground group-hover:text-primary transition-colors">{template.name}</h3>
+                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{template.description}</p>
                       </div>
                       {selectedTemplate?.id === template.id && (
-                          <div className="absolute top-2 right-2 md:top-3 md:right-3 h-5 w-5 md:h-6 md:w-6 bg-primary rounded-full flex items-center justify-center shadow-lg">
-                              <Check className="h-3 w-3 md:h-3.5 md:w-3.5 text-white" />
+                          <div className="absolute top-4 right-4 h-8 w-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-300">
+                              <Check className="h-4 w-4 stroke-[3px]" />
                           </div>
                       )}
                     </motion.div>
                   ))}
                 </AnimatePresence>
-              </motion.div>
+              </div>
             </ScrollArea>
 
-            {/* Selection UI */}
-            <div className="p-4 md:p-8 border-t bg-muted/5 flex flex-col sm:flex-row items-stretch sm:items-end gap-4 md:gap-6 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.05)] flex-shrink-0">
-               <div className="flex-1 space-y-2 md:space-y-2.5">
-                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1">Board Name</label>
-                 <Input 
-                   placeholder="e.g. Q4 Strategy" 
-                   value={boardName}
-                   onChange={(e) => setBoardName(e.target.value)}
-                   className="h-10 md:h-12 text-base md:text-lg font-medium bg-background border-2 focus-visible:ring-offset-0 focus-visible:ring-primary/20"
-                   autoFocus
-                 />
-               </div>
-               <div className="flex gap-3 justify-end mt-2 sm:mt-0">
-                 <Button variant="ghost" className="md:hidden" onClick={() => onOpenChange(false)}>Cancel</Button>
-                 <Button 
-                   size="lg"
-                   className="h-10 md:h-12 px-6 md:px-8 font-bold text-sm md:text-base transition-all active:scale-95 w-full sm:w-auto"
-                   disabled={!selectedTemplate || !boardName || isSubmitting}
-                   onClick={handleConfirm}
-                 >
-                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 md:h-5 md:w-5 animate-spin" />}
-                   Create Board
-                 </Button>
+            {/* Sticky Action Footer */}
+            <div className="p-8 lg:p-10 border-t bg-background sticky bottom-0 z-20 shadow-[0_-10px_30px_rgba(0,0,0,0.03)]">
+               <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-end gap-6">
+                  <div className="flex-1 w-full space-y-3">
+                    <label className="text-[11px] font-black text-primary uppercase tracking-[0.2em] ml-1">Board Name</label>
+                    <Input 
+                      placeholder="Enter a descriptive name..." 
+                      value={boardName}
+                      onChange={(e) => setBoardName(e.target.value)}
+                      className="h-14 text-xl font-bold bg-muted/20 border-2 border-transparent focus-visible:border-primary/30 focus-visible:ring-0 rounded-2xl px-6 transition-all"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex gap-4 w-full md:w-auto">
+                    <Button 
+                      size="lg"
+                      className="h-14 px-10 rounded-2xl font-black text-lg transition-all active:scale-95 shadow-xl hover:shadow-primary/20 bg-primary hover:bg-primary/90 text-primary-foreground w-full"
+                      disabled={!selectedTemplate || !boardName || isSubmitting}
+                      onClick={handleConfirm}
+                    >
+                      {isSubmitting ? <Loader2 className="mr-2 h-6 w-6 animate-spin" /> : <Plus className="mr-2 h-6 w-6 stroke-[3px]" />}
+                      Create Board
+                    </Button>
+                  </div>
                </div>
             </div>
-          </main>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
