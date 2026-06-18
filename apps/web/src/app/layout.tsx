@@ -23,11 +23,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            nextjs-portal { display: none !important; }
+            #webpack-hmr-error-overlay { display: none !important; }
+          `
+        }} />
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              const originalError = console.error;
+              console.error = (...args) => {
+                if (/ResizeObserver loop/.test(args[0])) return;
+                originalError.call(console, ...args);
+              };
               window.addEventListener('error', function(e) {
-                if (e.message === 'ResizeObserver loop limit exceeded' || e.message === 'ResizeObserver loop completed with undelivered notifications.') {
+                if (e.message && e.message.includes('ResizeObserver loop')) {
                   e.stopImmediatePropagation();
                 }
               });
