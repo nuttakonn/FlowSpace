@@ -8,6 +8,7 @@ import {
   addEdge,
   applyNodeChanges,
   applyEdgeChanges,
+  MarkerType,
 } from '@xyflow/react';
 import { v4 as uuidv4 } from 'uuid';
 import * as Y from 'yjs';
@@ -83,7 +84,7 @@ interface CanvasState {
   templates: BoardTemplateResponse[];
   showCurrentInPreview: boolean;
 
-  initialize: (boardId: string, workspaceId: string, accessToken: string, userName: string, userId: string, boardType: string, token?: string) => void;
+  initialize: (boardId: string, workspaceId: string, accessToken: string, userName: string, userId: string, boardType: string, token?: string, templateId?: string) => void;
   disconnect: () => void;
   loadViewportElements: (x: number, y: number, width: number, height: number) => Promise<void>;
   
@@ -97,6 +98,7 @@ interface CanvasState {
   
   addNode: (type: string, position: { x: number; y: number }, data?: any) => void;
   updateNodeLabel: (id: string, label: string) => void;
+  updateNodeColor: (id: string, color: string) => void;
   saveNodePosition: (node: Node) => void;
   deleteElements: (nodesToDelete: Node[], edgesToDelete: Edge[]) => void;
   
@@ -139,13 +141,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     hubConnection: null, remoteUsers: {}, isGeneratingAi: false, aiStatus: '',
     previewNodes: [], previewEdges: [], aiHistory: [], templates: [], showCurrentInPreview: true,
 
-    initialize: (boardId, workspaceId, accessToken, userName, userId, boardType, token) => {
+    initialize: (boardId, workspaceId, accessToken, userName, userId, boardType, token, templateId) => {
       const state = get();
       if (state.boardId === boardId && state.hubConnection?.state === signalR.HubConnectionState.Connected) {
         return;
       }
 
       // Important: clear the local state to prevent ghost nodes from the previous board
+      const localYDoc = new Y.Doc();
+      const localYNodes = localYDoc.getMap(`nodes_${boardId}`);
+      const localYEdges = localYDoc.getMap(`edges_${boardId}`);
+      const localYWhiteboard = localYDoc.getMap(`whiteboard_${boardId}`);
+
       set({ 
         boardId, 
         workspaceId, 
@@ -158,13 +165,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         syncStatus: 'idle', 
         tempToRealIdMap: {}, 
         clipboard: null, 
-        remoteUsers: {} 
+        remoteUsers: {},
+        yDoc: localYDoc,
+        yNodes: localYNodes,
+        yEdges: localYEdges,
+        yWhiteboard: localYWhiteboard
       });
-
-      // Clear the Yjs maps since we share the same document instance across boards
-      const { yNodes, yEdges } = get();
-      yNodes.clear();
-      yEdges.clear();
 
       // Cleanup existing connection if any
       if (state.hubConnection) {
@@ -188,19 +194,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
 
       set({ hubConnection: connection });
 
-      // Clean up old observers to prevent memory leaks and redundant renders
-      yDoc.off('update', () => {});
-      yNodes.unobserve(() => {});
-      yEdges.unobserve(() => {});
-
-      yDoc.on('update', (update) => { 
+      localYDoc.on('update', (update) => { 
         if (connection.state === signalR.HubConnectionState.Connected) { 
           connection.invoke('UpdateCanvas', boardId, update); 
         } 
       });
 
       connection.on('OnUpdate', (update: Uint8Array) => { 
-        Y.applyUpdate(yDoc, update, 'remote'); 
+        Y.applyUpdate(localYDoc, update, 'remote'); 
       });
 
       connection.on('OnAwareness', (awarenessUpdate: Uint8Array) => {
@@ -208,14 +209,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         set((s) => ({ remoteUsers: { ...s.remoteUsers, [state.clientId]: state.userState } }));
       });
       
-      // Observe all node and edge changes regardless of boardType since we've unified the canvas engine
-      yNodes.observe(() => { 
-        const updatedNodes = Array.from(yNodes.values()).map(n => n as Node);
+      localYNodes.observe(() => { 
+        const updatedNodes = Array.from(localYNodes.values()).map(n => n as Node);
         set({ nodes: updatedNodes }); 
       });
       
-      yEdges.observe(() => { 
-        const updatedEdges = Array.from(yEdges.values()).map(e => e as Edge);
+      localYEdges.observe(() => { 
+        const updatedEdges = Array.from(localYEdges.values()).map(e => e as Edge);
         set({ edges: updatedEdges }); 
       });
 
@@ -225,6 +225,121 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
           clientId: connection.connectionId, 
           userState: { id: userId, name: userName, color: userColor, selection: [], lastActive: Date.now() } 
         })));
+
+        // Seeding templates if the board is brand new and empty
+        setTimeout(() => {
+          if (localYNodes.size === 0 && templateId && templateId !== 'blank-flowchart') {
+            console.log("Seeding template:", templateId);
+            if (templateId === 'simple-flowchart') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'circle', position: { x: 250, y: 100 }, data: { label: 'Start' } };
+              const n2: Node = { id: id2, type: 'rectangle', position: { x: 200, y: 250 }, data: { label: 'Process Step' } };
+              const n3: Node = { id: id3, type: 'circle', position: { x: 250, y: 420 }, data: { label: 'End' } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Circle', x: 250, y: 100, metadata: JSON.stringify({ label: 'Start' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Rectangle', x: 200, y: 250, metadata: JSON.stringify({ label: 'Process Step' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Circle', x: 250, y: 420, metadata: JSON.stringify({ label: 'End' }) } });
+              
+              const e1Id = `temp-${uuidv4()}`;
+              const e2Id = `temp-${uuidv4()}`;
+              const e1: Edge = { id: e1Id, source: id1, target: id2, sourceHandle: 's-bottom', targetHandle: 't-top', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e2: Edge = { id: e2Id, source: id2, target: id3, sourceHandle: 's-bottom', targetHandle: 't-top', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              
+              localYEdges.set(e1Id, e1);
+              localYEdges.set(e2Id, e2);
+              
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id2, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
+            } else if (templateId === 'system-architecture') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              const id4 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'client', position: { x: 100, y: 200 }, data: { label: 'User Client' } };
+              const n2: Node = { id: id2, type: 'infrastructure', position: { x: 300, y: 200 }, data: { label: 'Load Balancer', iconName: 'Network', color: 'bg-indigo-500/10 text-indigo-600', sublabel: 'Network' } };
+              const n3: Node = { id: id3, type: 'infrastructure', position: { x: 550, y: 200 }, data: { label: 'API Gateway', iconName: 'Zap', color: 'bg-yellow-500/10 text-yellow-600', sublabel: 'API Gateway' } };
+              const n4: Node = { id: id4, type: 'database', position: { x: 800, y: 200 }, data: { label: 'Production DB' } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              localYNodes.set(id4, n4);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Client', x: 100, y: 200, metadata: JSON.stringify({ label: 'User Client' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Infrastructure', x: 300, y: 200, metadata: JSON.stringify({ label: 'Load Balancer', iconName: 'Network', color: 'bg-indigo-500/10 text-indigo-600', sublabel: 'Network' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Infrastructure', x: 550, y: 200, metadata: JSON.stringify({ label: 'API Gateway', iconName: 'Zap', color: 'bg-yellow-500/10 text-yellow-600', sublabel: 'API Gateway' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id4, payload: { type: 'Database', x: 800, y: 200, metadata: JSON.stringify({ label: 'Production DB' }) } });
+              
+              const e1Id = `temp-${uuidv4()}`;
+              const e2Id = `temp-${uuidv4()}`;
+              const e3Id = `temp-${uuidv4()}`;
+              
+              const e1: Edge = { id: e1Id, source: id1, target: id2, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e2: Edge = { id: e2Id, source: id2, target: id3, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e3: Edge = { id: e3Id, source: id3, target: id4, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              
+              localYEdges.set(e1Id, e1);
+              localYEdges.set(e2Id, e2);
+              localYEdges.set(e3Id, e3);
+              
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id2, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e3Id, payload: { sourceNodeId: id3, targetNodeId: id4, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
+            } else if (templateId === 'brainstorming') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'stickynote', position: { x: 100, y: 100 }, data: { label: 'Idea 1: Core Features\n- Visual Canvas\n- Multi-user' } };
+              const n2: Node = { id: id2, type: 'stickynote', position: { x: 320, y: 100 }, data: { label: 'Idea 2: Marketing\n- Product Hunt\n- Tech Blogs' } };
+              const n3: Node = { id: id3, type: 'stickynote', position: { x: 100, y: 320 }, data: { label: 'Idea 3: Design\n- Clean aesthetics\n- Modern Accordion' } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'StickyNote', x: 100, y: 100, metadata: JSON.stringify({ label: 'Idea 1: Core Features\n- Visual Canvas\n- Multi-user' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'StickyNote', x: 320, y: 100, metadata: JSON.stringify({ label: 'Idea 2: Marketing\n- Product Hunt\n- Tech Blogs' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'StickyNote', x: 100, y: 320, metadata: JSON.stringify({ label: 'Idea 3: Design\n- Clean aesthetics\n- Modern Accordion' }) } });
+            } else if (templateId === 'org-chart') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'rectangle', position: { x: 300, y: 50 }, data: { label: 'CEO / Founder\n(Strategic Direction)' } };
+              const n2: Node = { id: id2, type: 'rectangle', position: { x: 150, y: 200 }, data: { label: 'VP of Engineering\n(Technical Execution)' } };
+              const n3: Node = { id: id3, type: 'rectangle', position: { x: 450, y: 200 }, data: { label: 'VP of Product\n(Product Roadmap)' } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Rectangle', x: 300, y: 50, metadata: JSON.stringify({ label: 'CEO / Founder\n(Strategic Direction)' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Rectangle', x: 150, y: 200, metadata: JSON.stringify({ label: 'VP of Engineering\n(Technical Execution)' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Rectangle', x: 450, y: 200, metadata: JSON.stringify({ label: 'VP of Product\n(Product Roadmap)' }) } });
+              
+              const e1Id = `temp-${uuidv4()}`;
+              const e2Id = `temp-${uuidv4()}`;
+              const e1: Edge = { id: e1Id, source: id1, target: id2, sourceHandle: 's-bottom', targetHandle: 't-top', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e2: Edge = { id: e2Id, source: id1, target: id3, sourceHandle: 's-bottom', targetHandle: 't-top', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              
+              localYEdges.set(e1Id, e1);
+              localYEdges.set(e2Id, e2);
+              
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id1, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
+            }
+          }
+        }, 1000);
+
       }).catch((err) => {
         console.error('SignalR Connection Error:', err);
         toast.error('Failed to connect to real-time engine');
@@ -255,7 +370,30 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       try {
         set({ isLoading: true });
         const response = await apiClient.get<DiagramResponse>(`/boards/${state.boardId}/elements`, { params: { x: x - bufferX, y: y - bufferY, width: width + bufferX * 2, height: height + bufferY * 2 } });
-        set((s) => ({ nodes: [...response.data.nodes.map(n => ({ id: n.id, type: n.type.toLowerCase(), position: { x: n.x, y: n.y }, data: { label: n.type, metadata: n.metadata } })), ...s.nodes.filter(n => n.id.startsWith('temp-'))], edges: [...response.data.edges.map(e => ({ id: e.id, source: e.sourceNodeId, target: e.targetNodeId })), ...s.edges.filter(e => e.id.startsWith('temp-'))] }));
+        
+        const fetchedNodes = response.data.nodes.map(n => {
+          let meta: any = {};
+          try { if (n.metadata) meta = JSON.parse(n.metadata); } catch(err) {}
+          return { id: n.id, type: n.type.toLowerCase(), position: { x: n.x, y: n.y }, data: { label: meta.label || n.type, ...meta } };
+        });
+
+        const fetchedEdges = response.data.edges.map(e => {
+          let meta: any = {};
+          try { if (e.metadata) meta = JSON.parse(e.metadata); } catch(err) {}
+          return { 
+            id: e.id, 
+            source: e.sourceNodeId, 
+            target: e.targetNodeId,
+            sourceHandle: meta.sourceHandle || undefined,
+            targetHandle: meta.targetHandle || undefined,
+            markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' }
+          };
+        });
+
+        set((s) => ({ 
+          nodes: [...fetchedNodes, ...s.nodes.filter(n => n.id.startsWith('temp-'))], 
+          edges: [...fetchedEdges, ...s.edges.filter(e => e.id.startsWith('temp-'))] 
+        }));
       } catch (error) { toast.error('Failed to load viewport data'); } finally { set({ isLoading: false }); }
     },
 
@@ -355,8 +493,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         get().updateSelection(updatedNodes.filter(n => n.selected).map(n => n.id));
         set({ nodes: updatedNodes });
 
-        // Sync dimensions back to Yjs if this was a dimensions change (from resizing)
+        // Sync changes back to Yjs
         realChanges.forEach(change => {
+            if (change.type === 'position') {
+                const node = updatedNodes.find(n => n.id === change.id);
+                if (node) yNodes.set(change.id, node);
+            }
             if (change.type === 'dimensions' && change.dimensions) {
                 const node = yNodes.get(change.id);
                 if (node) {
@@ -367,7 +509,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
                         Math.abs((metadata.height || 0) - change.dimensions.height) > 1) {
                         
                         const updatedData = { ...metadata, width: change.dimensions.width, height: change.dimensions.height };
-                        const updatedNode = { ...node, data: updatedData };
+                        const updatedNode = { ...node, id: change.id, data: updatedData };
                         yNodes.set(change.id, updatedNode);
                         get().saveNodePosition(updatedNode); // Persist to backend
                     }
@@ -390,9 +532,24 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       get().commitHistory();
       if (!connection.source || !connection.target) return;
       const tempId = `temp-${uuidv4()}`;
-      const tempEdge: Edge = { id: tempId, source: connection.source, target: connection.target };
+      const tempEdge: Edge = { 
+        id: tempId, 
+        source: connection.source, 
+        target: connection.target,
+        sourceHandle: connection.sourceHandle || undefined,
+        targetHandle: connection.targetHandle || undefined,
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' }
+      };
       yEdges.set(tempId, tempEdge);
-      get().enqueueMutation({ type: 'CREATE_EDGE', tempId, payload: { sourceNodeId: connection.source, targetNodeId: connection.target, metadata: '{}' } });
+      get().enqueueMutation({ 
+        type: 'CREATE_EDGE', 
+        tempId, 
+        payload: { 
+          sourceNodeId: connection.source, 
+          targetNodeId: connection.target, 
+          metadata: JSON.stringify({ sourceHandle: connection.sourceHandle, targetHandle: connection.targetHandle }) 
+        } 
+      });
     },
 
     addNode: (type, position, data) => {
@@ -411,6 +568,23 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const node = yNodes.get(id);
       if (node) {
         const updatedNode = { ...node, data: { ...node.data, label } };
+        yNodes.set(id, updatedNode);
+        
+        const realId = get().resolveRealId(id);
+        if (!realId.startsWith('temp-')) {
+          get().enqueueMutation({ 
+            type: 'UPDATE_NODE', 
+            payload: { id: realId, type: updatedNode.type, x: updatedNode.position.x, y: updatedNode.position.y, metadata: JSON.stringify(updatedNode.data) } 
+          });
+        }
+      }
+    },
+
+    updateNodeColor: (id: string, color: string) => {
+      const { yNodes } = get();
+      const node = yNodes.get(id);
+      if (node) {
+        const updatedNode = { ...node, data: { ...node.data, color } };
         yNodes.set(id, updatedNode);
         
         const realId = get().resolveRealId(id);

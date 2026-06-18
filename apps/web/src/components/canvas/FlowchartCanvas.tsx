@@ -90,7 +90,8 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
 
   useEffect(() => {
     console.log("🚀 FlowSpace Engine v2.5 Initializing Board:", boardId);
-    initialize(boardId, workspaceId, accessToken, userName, userId, "Flowchart", token);
+    const templateId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('template') || undefined : undefined;
+    initialize(boardId, workspaceId, accessToken, userName, userId, "Flowchart", token, templateId);
 
     const handleOnline = () => {
       processQueue();

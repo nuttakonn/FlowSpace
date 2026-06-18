@@ -145,8 +145,8 @@ export default function WorkspaceDetailsPage() {
       toast.success("Board created successfully");
       setIsTemplateGalleryOpen(false);
       
-      // Redirect to the newly created board
-      router.push(`/boards/${newBoard.id}`);
+      // Redirect to the newly created board with the starting template parameter
+      router.push(`/boards/${newBoard.id}?template=${template.id}`);
       
     } catch (err: unknown) {
       const e = err as { response?: { data?: { detail?: string } } };

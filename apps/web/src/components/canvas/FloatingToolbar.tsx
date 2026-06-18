@@ -141,25 +141,39 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
   const [activeTool, setActiveTool] = useState('select');
   const [iconSearch, setIconSearch] = useState('');
 
-  const shapes = [
+  const general = [
     { type: 'Rectangle', icon: Square, label: 'Rectangle' },
+    { type: 'Rectangle', icon: Square, label: 'Rounded', data: { color: 'rounded-[30px]' } },
     { type: 'Circle', icon: Circle, label: 'Circle' },
+    { type: 'Circle', icon: Circle, label: 'Ellipse', data: { width: 180, height: 100 } },
+    { type: 'Diamond', icon: Diamond, label: 'Diamond' },
+    { type: 'Text', icon: Type, label: 'Text' },
+  ];
+
+  const flowchart = [
+    { type: 'Rectangle', icon: Square, label: 'Process' },
     { type: 'Diamond', icon: Diamond, label: 'Decision' },
-    { type: 'Database', icon: Database, label: 'Database' },
-    { type: 'Cloud', icon: Cloud, label: 'General Cloud' },
+    { type: 'Rectangle', icon: FileText, label: 'Document', data: { color: 'border-b-8 border-b-primary/50' } },
+    { type: 'Database', icon: Database, label: 'Data' },
+    { type: 'Circle', icon: Circle, label: 'Start / End', data: { width: 80, height: 80, color: 'border-4' } },
+    { type: 'Cloud', icon: Cloud, label: 'Cloud' },
+  ];
+
+  const entityRelation = [
+    { type: 'Rectangle', icon: Square, label: 'Entity', data: { width: 200, height: 60, color: 'bg-primary/5 font-bold' } },
+    { type: 'Circle', icon: Circle, label: 'Attribute', data: { width: 140, height: 80, color: 'border-dashed' } },
+    { type: 'Diamond', icon: Diamond, label: 'Relationship', data: { color: 'bg-muted' } },
   ];
 
   const infrastructure = [
-    { type: 'Infrastructure', label: 'AWS', icon: Cloud, iconName: 'Cloud', data: { color: 'bg-orange-500/10 text-orange-600', sublabel: 'Cloud Service' } },
-    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, iconName: 'Box', data: { color: 'bg-blue-500/10 text-blue-600', sublabel: 'Cluster' } },
-    { type: 'Infrastructure', label: 'Docker', icon: Container, iconName: 'Container', data: { color: 'bg-cyan-500/10 text-cyan-600', sublabel: 'Container' } },
-    { type: 'Infrastructure', label: 'Server', icon: Server, iconName: 'Server', data: { color: 'bg-slate-500/10 text-slate-600', sublabel: 'Compute' } },
-    { type: 'Infrastructure', label: 'Load Balancer', icon: Network, iconName: 'Network', data: { color: 'bg-indigo-500/10 text-indigo-600', sublabel: 'Network' } },
-    { type: 'Infrastructure', label: 'Firewall', icon: Shield, iconName: 'Shield', data: { color: 'bg-red-500/10 text-red-600', sublabel: 'Security' } },
-    { type: 'Infrastructure', label: 'API Gateway', icon: Zap, iconName: 'Zap', data: { color: 'bg-yellow-500/10 text-yellow-600', sublabel: 'API' } },
-    { type: 'Infrastructure', label: 'Function', icon: Cpu, iconName: 'Cpu', data: { color: 'bg-pink-500/10 text-pink-600', sublabel: 'Lambda' } },
-    { type: 'Infrastructure', label: 'Kafka', icon: Activity, iconName: 'Activity', data: { color: 'bg-purple-500/10 text-purple-600', sublabel: 'Streaming' } },
-    { type: 'Infrastructure', label: 'Storage', icon: HardDrive, iconName: 'HardDrive', data: { color: 'bg-emerald-500/10 text-emerald-600', sublabel: 'S3/EBS' } },
+    { type: 'Infrastructure', label: 'AWS', icon: Cloud, iconName: 'Cloud', data: { color: 'bg-orange-500/10 text-orange-600 border-orange-500/50', sublabel: 'Cloud Service' } },
+    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, iconName: 'Box', data: { color: 'bg-blue-500/10 text-blue-600 border-blue-500/50', sublabel: 'Cluster' } },
+    { type: 'Infrastructure', label: 'Docker', icon: Container, iconName: 'Container', data: { color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/50', sublabel: 'Container' } },
+    { type: 'Infrastructure', label: 'Server', icon: Server, iconName: 'Server', data: { color: 'bg-slate-500/10 text-slate-600 border-slate-500/50', sublabel: 'Compute' } },
+    { type: 'Infrastructure', label: 'Load Balancer', icon: Network, iconName: 'Network', data: { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/50', sublabel: 'Network' } },
+    { type: 'Infrastructure', label: 'Firewall', icon: Shield, iconName: 'Shield', data: { color: 'bg-red-500/10 text-red-600 border-red-500/50', sublabel: 'Security' } },
+    { type: 'Infrastructure', label: 'API Gateway', icon: Zap, iconName: 'Zap', data: { color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/50', sublabel: 'API' } },
+    { type: 'Infrastructure', label: 'Database', icon: Database, iconName: 'DatabaseIcon', data: { color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/50', sublabel: 'Storage' } },
   ];
 
   const devices = [
@@ -216,24 +230,84 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
 
       <ScrollArea className="flex-1">
         <div className="flex flex-col">
-          {/* Basic Shapes Accordion */}
+          {/* General Shapes Accordion */}
           <div className="border-b">
             <button 
               className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
               onClick={() => toggleSection('basic')}
             >
-              Basic Shapes
+              General
               <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'basic' ? "rotate-45" : "")} />
             </button>
             {expandedSection === 'basic' && (
               <div className="grid grid-cols-3 gap-2 p-3 pt-0 bg-muted/10">
-                {shapes.map((shape) => (
+                {general.map((shape, i) => (
                   <Button
-                    key={shape.type}
+                    key={`${shape.type}-${i}`}
                     variant="outline"
                     className="flex flex-col h-16 gap-1 p-2 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm"
                     onClick={() => {
-                      onAddNode(shape.type);
+                      onAddNode(shape.type, shape.data);
+                      setActiveTool(shape.type);
+                    }}
+                    title={shape.label}
+                  >
+                    <shape.icon className="h-5 w-5 text-foreground" />
+                    <span className="text-[9px] font-semibold tracking-tighter truncate w-full">{shape.label}</span>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Flowchart Accordion */}
+          <div className="border-b">
+            <button 
+              className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
+              onClick={() => toggleSection('flowchart')}
+            >
+              Flowchart
+              <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'flowchart' ? "rotate-45" : "")} />
+            </button>
+            {expandedSection === 'flowchart' && (
+              <div className="grid grid-cols-3 gap-2 p-3 pt-0 bg-muted/10">
+                {flowchart.map((shape, i) => (
+                  <Button
+                    key={`${shape.type}-${i}`}
+                    variant="outline"
+                    className="flex flex-col h-16 gap-1 p-2 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm"
+                    onClick={() => {
+                      onAddNode(shape.type, shape.data);
+                      setActiveTool(shape.type);
+                    }}
+                    title={shape.label}
+                  >
+                    <shape.icon className="h-5 w-5 text-foreground" />
+                    <span className="text-[9px] font-semibold tracking-tighter truncate w-full">{shape.label}</span>
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Entity Relation Accordion */}
+          <div className="border-b">
+            <button 
+              className="flex items-center justify-between w-full p-3 hover:bg-muted/50 transition-colors text-sm font-bold uppercase tracking-wider text-muted-foreground"
+              onClick={() => toggleSection('er')}
+            >
+              Entity Relation
+              <Plus className={cn("h-4 w-4 transition-transform", expandedSection === 'er' ? "rotate-45" : "")} />
+            </button>
+            {expandedSection === 'er' && (
+              <div className="grid grid-cols-3 gap-2 p-3 pt-0 bg-muted/10">
+                {entityRelation.map((shape, i) => (
+                  <Button
+                    key={`${shape.type}-${i}`}
+                    variant="outline"
+                    className="flex flex-col h-16 gap-1 p-2 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm"
+                    onClick={() => {
+                      onAddNode(shape.type, shape.data);
                       setActiveTool(shape.type);
                     }}
                     title={shape.label}
