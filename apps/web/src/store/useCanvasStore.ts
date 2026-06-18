@@ -145,15 +145,31 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         return;
       }
 
+      // Important: clear the local state to prevent ghost nodes from the previous board
+      set({ 
+        boardId, 
+        workspaceId, 
+        boardType, 
+        nodes: [], 
+        edges: [], 
+        past: [], 
+        future: [], 
+        mutationQueue: [], 
+        syncStatus: 'idle', 
+        tempToRealIdMap: {}, 
+        clipboard: null, 
+        remoteUsers: {} 
+      });
+
+      // Clear the Yjs maps since we share the same document instance across boards
+      const { yNodes, yEdges } = get();
+      yNodes.clear();
+      yEdges.clear();
+
       // Cleanup existing connection if any
       if (state.hubConnection) {
         state.hubConnection.stop();
       }
-
-      const yDoc = new Y.Doc();
-      const yNodes = yDoc.getMap('nodes');
-      const yEdges = yDoc.getMap('edges');
-      const yWhiteboard = yDoc.getMap('whiteboard');
       
       const hubUrl = process.env.NEXT_PUBLIC_HUB_URL || 'https://flowspace-api-1kor.onrender.com/hubs/collaboration';
       const options: signalR.IHttpConnectionOptions = {};
@@ -170,25 +186,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         
       const userColor = USER_COLORS[Math.floor(Math.random() * USER_COLORS.length)];
 
-      set({ 
-        boardId, 
-        workspaceId, 
-        boardType, 
-        nodes: [], 
-        edges: [], 
-        past: [], 
-        future: [], 
-        mutationQueue: [], 
-        syncStatus: 'idle', 
-        tempToRealIdMap: {}, 
-        clipboard: null, 
-        yDoc, 
-        yNodes, 
-        yEdges, 
-        yWhiteboard, 
-        hubConnection: connection, 
-        remoteUsers: {} 
-      });
+      set({ hubConnection: connection });
+
+      // Clean up old observers to prevent memory leaks and redundant renders
+      yDoc.off('update', () => {});
+      yNodes.unobserve(() => {});
+      yEdges.unobserve(() => {});
 
       yDoc.on('update', (update) => { 
         if (connection.state === signalR.HubConnectionState.Connected) { 
@@ -208,13 +211,11 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       // Observe all node and edge changes regardless of boardType since we've unified the canvas engine
       yNodes.observe(() => { 
         const updatedNodes = Array.from(yNodes.values()).map(n => n as Node);
-        console.log('Nodes updated in Yjs:', updatedNodes.length);
         set({ nodes: updatedNodes }); 
       });
       
       yEdges.observe(() => { 
         const updatedEdges = Array.from(yEdges.values()).map(e => e as Edge);
-        console.log('Edges updated in Yjs:', updatedEdges.length);
         set({ edges: updatedEdges }); 
       });
 
@@ -359,12 +360,17 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
             if (change.type === 'dimensions' && change.dimensions) {
                 const node = yNodes.get(change.id);
                 if (node) {
-                    // Update style or style metadata to persist width/height
                     const metadata = typeof node.data === 'string' ? JSON.parse(node.data) : node.data;
-                    const updatedData = { ...metadata, width: change.dimensions.width, height: change.dimensions.height };
-                    const updatedNode = { ...node, data: updatedData };
-                    yNodes.set(change.id, updatedNode);
-                    get().saveNodePosition(updatedNode); // Save the resize to the backend
+                    
+                    // Only update if dimensions actually changed significantly to prevent loops
+                    if (Math.abs((metadata.width || 0) - change.dimensions.width) > 1 || 
+                        Math.abs((metadata.height || 0) - change.dimensions.height) > 1) {
+                        
+                        const updatedData = { ...metadata, width: change.dimensions.width, height: change.dimensions.height };
+                        const updatedNode = { ...node, data: updatedData };
+                        yNodes.set(change.id, updatedNode);
+                        get().saveNodePosition(updatedNode); // Persist to backend
+                    }
                 }
             }
         });
