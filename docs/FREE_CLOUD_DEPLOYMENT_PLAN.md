@@ -39,6 +39,7 @@ The API `Dockerfile` uses a Playwright base image. Some free-tier providers (lik
 | `Redis__ConnectionString` | Provided by Upstash (SSL enabled). |
 | `Jwt__Secret` | Generated 32+ char string. |
 | `Gemini__ApiKey` | Your Google AI Studio API Key. |
+| `INVITE_CODE` | The secret code required for user registration. |
 | `FrontendUrl` | `https://flowspace.vercel.app` |
 | `AllowedOrigins` | `https://flowspace.vercel.app` (For CORS) |
 

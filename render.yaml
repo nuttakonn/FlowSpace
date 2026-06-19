@@ -27,6 +27,8 @@ services:
         value: FlowSpaceClient
       - key: Gemini__ApiKey
         sync: false
+      - key: INVITE_CODE
+        sync: false
       - key: AllowedOrigins
         sync: false
       - key: FrontendUrl

@@ -36,8 +36,8 @@ FlowSpace follows the [RFC 7807 Problem Details](https://tools.ietf.org/html/rfc
 
 ### POST `/auth/register`
 Create a new user account.
-- **Request**: `{ "email": "user@example.com", "password": "securePassword123", "displayName": "John Doe" }`
-- **Response (201)**: `{ "id": "uuid", "email": "user@example.com", "displayName": "John Doe" }`
+- **Request**: `{ "email": "user@example.com", "password": "securePassword123", "displayName": "John Doe", "inviteCode": "secret-code" }`
+- **Response (200)**: `{ "id": "uuid", "email": "user@example.com", "displayName": "John Doe", "accessToken": "jwt...", "refreshToken": "uuid..." }`
 
 ### POST `/auth/login`
 Authenticate and receive tokens.

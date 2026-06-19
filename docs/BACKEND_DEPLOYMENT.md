@@ -51,6 +51,7 @@ Koyeb is a high-performance alternative to Render.
 | `REDIS_URL` | **Required** | Redis/Upstash connection URL (`rediss://...`). |
 | `Jwt__Secret` | **Required** | Secure 32+ character key for JWT signing. |
 | `Gemini__ApiKey` | **Required** | Google AI Studio API Key. |
+| `INVITE_CODE` | **Required** | The secret code required for user registration. |
 | `AllowedOrigins` | **Required** | Comma-separated frontend URLs (e.g. `https://flowspace.vercel.app`). |
 | `ApplyMigrationsOnStartup` | Optional | Set to `true` to automatically update DB schema. |
 

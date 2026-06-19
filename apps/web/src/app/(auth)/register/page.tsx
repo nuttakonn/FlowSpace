@@ -23,6 +23,7 @@ import { Label } from "@/components/ui/label";
 import { apiClient } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import { AuthResponse } from "@/types/auth";
+import { isAxiosError } from "axios";
 
 const registerSchema = z
   .object({
@@ -34,6 +35,7 @@ const registerSchema = z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
     confirmPassword: z.string(),
+    inviteCode: z.string().min(1, { message: "Invite code is required" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -63,6 +65,7 @@ export default function RegisterPage() {
         displayName: data.displayName,
         email: data.email,
         password: data.password,
+        inviteCode: data.inviteCode,
       });
 
       const authData = response.data;
@@ -78,21 +81,28 @@ export default function RegisterPage() {
 
       toast.success("Account created successfully");
       router.push("/onboarding");
-    } catch (error: any) {
-      if (error.response?.data?.errors) {
-        const serverErrors = error.response.data.errors;
-        Object.keys(serverErrors).forEach((key) => {
-          // Attempt to map server error keys (e.g., 'Email') to form fields ('email')
-          const field = (key.charAt(0).toLowerCase() +
-            key.slice(1)) as keyof RegisterFormValues;
-          if (field in registerSchema.shape || field === "confirmPassword") {
-            setError(field, { type: "server", message: serverErrors[key][0] });
-          } else {
-            toast.error(serverErrors[key][0]);
-          }
-        });
+    } catch (error: unknown) {
+      if (isAxiosError(error)) {
+        const data = error.response?.data as { detail?: string; errors?: Record<string, string[]> } | undefined;
+        if (data?.detail?.toLowerCase().includes("invite")) {
+          setError("inviteCode", { type: "server", message: "Invalid invite code" });
+        } else if (data?.errors) {
+          const serverErrors = data.errors;
+          Object.keys(serverErrors).forEach((key) => {
+            // Attempt to map server error keys (e.g., 'Email') to form fields ('email')
+            const field = (key.charAt(0).toLowerCase() +
+              key.slice(1)) as keyof RegisterFormValues;
+            if (field in registerSchema.shape || field === "confirmPassword") {
+              setError(field, { type: "server", message: serverErrors[key][0] });
+            } else {
+              toast.error(serverErrors[key][0]);
+            }
+          });
+        } else {
+          toast.error(data?.detail || "Registration failed");
+        }
       } else {
-        toast.error(error.response?.data?.detail || "Registration failed");
+        toast.error("Registration failed");
       }
     } finally {
       setIsLoading(false);
@@ -153,6 +163,20 @@ export default function RegisterPage() {
             {errors.confirmPassword && (
               <p className="text-sm text-destructive">
                 {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="inviteCode">Invite Code</Label>
+            <Input
+              id="inviteCode"
+              type="password"
+              placeholder="••••••••"
+              {...register("inviteCode")}
+            />
+            {errors.inviteCode && (
+              <p className="text-sm text-destructive">
+                {errors.inviteCode.message}
               </p>
             )}
           </div>

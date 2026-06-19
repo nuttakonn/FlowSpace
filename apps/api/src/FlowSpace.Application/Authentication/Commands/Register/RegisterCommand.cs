@@ -10,29 +10,37 @@ using System.Text;
 
 namespace FlowSpace.Application.Authentication.Commands.Register;
 
-public record RegisterCommand(string Email, string Password, string DisplayName) : ICommand<AuthenticationResponse>;
+public record RegisterCommand(string Email, string Password, string DisplayName, string InviteCode) : ICommand<AuthenticationResponse>;
 
 public class RegisterCommandHandler : ICommandHandler<RegisterCommand, AuthenticationResponse>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly IInviteCodeService _inviteCodeService;
     private readonly IUnitOfWork _unitOfWork;
 
     public RegisterCommandHandler(
         IUserRepository userRepository,
         IPasswordHasher passwordHasher,
         IJwtTokenGenerator jwtTokenGenerator,
+        IInviteCodeService inviteCodeService,
         IUnitOfWork unitOfWork)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _jwtTokenGenerator = jwtTokenGenerator;
+        _inviteCodeService = inviteCodeService;
         _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<AuthenticationResponse>> Handle(RegisterCommand command, CancellationToken cancellationToken)
     {
+        if (!_inviteCodeService.IsValid(command.InviteCode))
+        {
+            return Result.Failure<AuthenticationResponse>(new Error("Auth.InvalidInviteCode", "Invalid invite code."));
+        }
+
         if (await _userRepository.GetByEmailAsync(command.Email, cancellationToken) is not null)
         {
             return Result.Failure<AuthenticationResponse>(new Error("Auth.EmailAlreadyExists", "Email is already in use."));
