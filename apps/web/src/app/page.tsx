@@ -120,7 +120,10 @@ export default function HomePage() {
         params: { query: enterQuery.trim() }
       });
       
-      toast.success(`Entering workspace: ${response.data.name}`);
+      // Join the workspace as a member
+      await apiClient.post(`/workspaces/${response.data.id}/join`);
+      
+      toast.success(`Joined workspace: ${response.data.name}`);
       router.push(`/workspaces/${response.data.id}`);
     } catch (error: any) {
       console.error("Failed to look up workspace", error);

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using FlowSpace.Application.Workspaces.Commands.CreateWorkspace;
 using FlowSpace.Application.Workspaces.Commands.DeleteWorkspace;
 using FlowSpace.Application.Workspaces.Commands.UpdateWorkspace;
+using FlowSpace.Application.Workspaces.Commands.JoinWorkspace;
 using FlowSpace.Application.Workspaces.Queries.GetWorkspace;
 using FlowSpace.Application.Workspaces.Queries.ListWorkspaces;
 using FlowSpace.Application.Workspaces.Queries.FindWorkspace;
@@ -52,6 +53,16 @@ public class WorkspacesController : ApiController
         var result = await _sender.Send(findQuery);
 
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
+    }
+
+    [HttpPost("{id:guid}/join")]
+    public async Task<IActionResult> Join(Guid id)
+    {
+        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var command = new JoinWorkspaceCommand(id, userId);
+        var result = await _sender.Send(command);
+
+        return result.IsSuccess ? Ok() : HandleFailure(result);
     }
 
     [HttpGet]

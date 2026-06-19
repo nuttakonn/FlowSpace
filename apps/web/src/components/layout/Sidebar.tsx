@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Users,
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  Home,
 } from "lucide-react";
 
 import { useAuthStore } from "@/store/useAuthStore";
@@ -23,12 +24,14 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, clearAuth } = useAuthStore();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/workspaces", label: "Workspaces", icon: Users },
+    { href: "/", label: "Switch Workspace", icon: Home },
   ];
 
   return (
@@ -112,7 +115,12 @@ export function Sidebar({ className }: SidebarProps) {
             "mt-4 w-full justify-start text-muted-foreground hover:text-foreground",
             isCollapsed ? "px-0 justify-center" : "",
           )}
-          onClick={clearAuth}
+          onClick={() => {
+            router.push("/");
+            setTimeout(() => {
+              clearAuth();
+            }, 50);
+          }}
         >
           <LogOut className={cn("h-4 w-4", !isCollapsed && "mr-2")} />
           {!isCollapsed && <span>Log out</span>}
