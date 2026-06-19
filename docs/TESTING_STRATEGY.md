@@ -5,7 +5,7 @@ FlowSpace adheres to the testing pyramid, prioritizing fast unit tests while ens
 
 ## Unit Testing
 - **Target**: Domain logic, Utility functions, MediatR Handlers.
-- **Backend**: xUnit, FluentAssertions, NSubstitute (for mocking).
+- **Backend**: xUnit, FluentAssertions, Moq (for mocking).
 - **Frontend**: Jest, React Testing Library.
 
 ## Integration Testing
