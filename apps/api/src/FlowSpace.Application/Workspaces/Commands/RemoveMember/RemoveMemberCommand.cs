@@ -26,6 +26,11 @@ public class RemoveMemberCommandHandler : ICommandHandler<RemoveMemberCommand>
             return Result.Failure(new Error("Workspace.NotFound", "Workspace not found."));
         }
 
+        if (!workspace.Members.Any(m => m.UserId == command.UserId))
+        {
+            return Result.Failure(new Error("Workspace.MemberNotFound", "Member not found."));
+        }
+
         workspace.RemoveMember(command.UserId);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
