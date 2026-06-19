@@ -21,7 +21,6 @@ public class RefreshToken : Entity
     {
         return new RefreshToken
         {
-            Id = Guid.NewGuid(),
             TokenHash = tokenHash,
             ExpiresAt = expiresAt,
             UserId = userId

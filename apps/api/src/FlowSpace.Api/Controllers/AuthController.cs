@@ -22,15 +22,6 @@ public class AuthController : ApiController
         _sender = sender;
     }
 
-    [HttpPost("register")]
-    [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterRequest request)
-    {
-        var command = new RegisterCommand(request.Email, request.Password, request.DisplayName, request.InviteCode);
-        var result = await _sender.Send(command);
-
-        return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
-    }
 
     [HttpPost("login")]
     [AllowAnonymous]

@@ -18,6 +18,12 @@ public abstract class ApiController : ControllerBase
                         StatusCodes.Status400BadRequest,
                         result.Error,
                         validationResult.Errors)),
+            _ when result.Error.Code.EndsWith(".NotFound") || result.Error.Code == "NotFound" =>
+                NotFound(
+                    CreateProblemDetails(
+                        "Not Found",
+                        StatusCodes.Status404NotFound,
+                        result.Error)),
             _ =>
                 BadRequest(
                     CreateProblemDetails(

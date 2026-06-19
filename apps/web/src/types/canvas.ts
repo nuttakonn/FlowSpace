@@ -49,3 +49,11 @@ export interface CreateEdgeRequest {
   targetNodeId: string;
   metadata: string;
 }
+
+export interface RemoteUser {
+  userId: string;
+  displayName: string;
+  color: string;
+  cursor?: { x: number; y: number };
+  selectedNodeIds?: string[];
+}
