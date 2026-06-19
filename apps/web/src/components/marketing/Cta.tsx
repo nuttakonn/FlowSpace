@@ -30,11 +30,7 @@ export function Cta() {
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <Link href="/pricing">
-                <Button size="lg" variant="outline" className="h-14 px-8 text-lg font-bold border-2 bg-transparent hover:bg-white/10 border-white/20">
-                  View Pricing
-                </Button>
-              </Link>
+
             </div>
           </div>
         </div>

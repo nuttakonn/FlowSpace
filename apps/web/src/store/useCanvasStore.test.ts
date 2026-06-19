@@ -3,6 +3,24 @@ import { useCanvasStore } from './useCanvasStore';
 
 describe('useCanvasStore Mutation Queue System', () => {
   beforeEach(() => {
+    const store = useCanvasStore.getState();
+    
+    // Clear Yjs maps for clean state
+    store.yNodes.clear();
+    store.yEdges.clear();
+
+    // Register observers to sync Yjs updates with Zustand state in tests
+    store.yNodes.observe(() => {
+      useCanvasStore.setState({
+        nodes: Array.from(store.yNodes.values())
+      });
+    });
+    store.yEdges.observe(() => {
+      useCanvasStore.setState({
+        edges: Array.from(store.yEdges.values())
+      });
+    });
+
     useCanvasStore.setState({
       nodes: [],
       edges: [],
