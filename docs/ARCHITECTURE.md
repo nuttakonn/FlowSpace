@@ -15,6 +15,8 @@ FlowSpace is built with a modern web architecture focusing on real-time collabor
 
 ## Core Patterns
 
-- Clean Architecture
-- CQRS with MediatR
-- Real-time CRDTs with Yjs
+- Clean Architecture (Domain, Application, Infrastructure, Api)
+- CQRS with MediatR for clean command/query handling
+- Real-time CRDTs with Yjs and SignalR WebSockets transport
+- Unified sidebar navigation shell (keeping users in-app between workspaces and the main dashboard)
+- AI Assistant panels (triggerable from the editor header, sending prompts via MediatR to Gemini API services)

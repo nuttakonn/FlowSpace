@@ -21,7 +21,6 @@ import { PlusSquare, Undo, Redo, Loader2, CloudUpload, CloudOff, UserCircle2 } f
 import { RemoteCursors } from "./RemoteCursors";
 import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
-import { AiSidePanel } from "./AiSidePanel";
 import { FloatingToolbar } from "./FloatingToolbar";
 import { RectangleNode, DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode, TextNode, InfrastructureNode, ClientNode, MobileNode } from "./nodes/CustomNodes";
 
@@ -200,8 +199,6 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
         
         <RemoteSelectionHighlights />
         <RemoteCursors />
-
-        <AiSidePanel />
 
         <Panel position="top-left" className="ml-4 mt-20">
           <FloatingToolbar onAddNode={handleAddNode} />

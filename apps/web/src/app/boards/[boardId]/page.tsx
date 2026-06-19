@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 import { FlowchartCanvas } from "@/components/canvas/FlowchartCanvas";
 import { ShareDialog } from "@/components/canvas/ShareDialog";
+import { AiSidePanel } from "@/components/canvas/AiSidePanel";
 
 interface Board {
   id: string;
@@ -96,6 +97,7 @@ export default function BoardEditorPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <AiSidePanel />
           <ShareDialog boardId={board.id} />
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <Settings className="h-4 w-4" />

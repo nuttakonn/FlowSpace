@@ -19,14 +19,14 @@ into a single unified experience.
 
 ## Business Goals
 
-Provide a modern alternative to:
+Provide a modern, personal, and team-focused alternative to:
 
 * Whimsical
 * Miro
 * Draw.io
 * FigJam
 
-while integrating AI generation directly into the workflow.
+while integrating AI generation directly into the workflow. There is no plan to commercialize, sell, or operate FlowSpace as a SaaS; it is built purely as an internal utility for teams.
 
 ---
 
@@ -121,6 +121,8 @@ Not included in v1:
 * Voice Chat
 * Team Messaging
 * Screen Sharing
+* SaaS Billing & Pricing Plan Management (strictly personal & internal team edition)
+* Favorites & Global App Settings (deferred/not included in initial version)
 
 ---
 
@@ -130,4 +132,6 @@ Not included in v1:
 * Support 100,000 nodes per board
 * Support realtime collaboration latency below 200ms
 * Export PNG, PDF, SVG
-* Generate diagrams through AI prompts
+* Generate diagrams through AI prompts (leveraging Gemini API)
+* Unified sidebar layout navigation across Dashboard and Workspace pages
+* AI Assistant trigger accessible via the Board editor header toolbar
