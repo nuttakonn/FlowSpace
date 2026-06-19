@@ -105,4 +105,32 @@ public class LoginCommandHandlerTests
         result.Error.Code.Should().Be("Auth.InvalidCredentials");
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    public async Task Handle_ShouldGenerateBothTokens_WhenLoginSucceeds()
+    {
+        // Arrange
+        var command = new LoginCommand("test@email.com", "Password123!");
+        var user = User.Create(Guid.NewGuid(), command.Email, "hashed_password", "Test User");
+
+        _userRepositoryMock.Setup(x => x.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(user);
+
+        _passwordHasherMock.Setup(x => x.VerifyPassword(command.Password, user.PasswordHash))
+            .Returns(true);
+
+        _jwtTokenGeneratorMock.Setup(x => x.GenerateToken(user))
+            .Returns("access_token");
+
+        _jwtTokenGeneratorMock.Setup(x => x.GenerateRefreshToken())
+            .Returns("refresh_token");
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        _jwtTokenGeneratorMock.Verify(x => x.GenerateToken(user), Times.Once);
+        _jwtTokenGeneratorMock.Verify(x => x.GenerateRefreshToken(), Times.Once);
+    }
 }
