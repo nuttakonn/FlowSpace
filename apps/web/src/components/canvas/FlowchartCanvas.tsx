@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import {
   ReactFlow,
   MiniMap,
@@ -17,7 +17,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useCanvasStore } from "@/store/useCanvasStore";
 import { Button } from "@/components/ui/button";
-import { PlusSquare, Undo, Redo, Loader2, CloudUpload, CloudOff, UserCircle2 } from "lucide-react";
+import { PlusSquare, Undo, Redo, Loader2, CloudUpload, CloudOff, UserCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { RemoteCursors } from "./RemoteCursors";
 import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
@@ -59,6 +59,7 @@ export function FlowchartCanvas(props: FlowchartCanvasProps) {
 function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, userId, token }: FlowchartCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   const nodes = useCanvasStore(s => s.nodes);
   const edges = useCanvasStore(s => s.edges);
@@ -200,8 +201,31 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
         <RemoteSelectionHighlights />
         <RemoteCursors />
 
-        <Panel position="top-left" className="ml-4 mt-20">
-          <FloatingToolbar onAddNode={handleAddNode} />
+        <Panel position="top-left" className="ml-4 mt-20 flex gap-2 items-start pointer-events-auto">
+          {isSidebarOpen ? (
+            <div className="flex gap-2 items-start">
+              <FloatingToolbar onAddNode={handleAddNode} />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="h-10 w-10 bg-background border shadow-md rounded-lg hover:bg-muted"
+                onClick={() => setIsSidebarOpen(false)}
+                title="Collapse Shapes Panel"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+            </div>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="icon" 
+              className="h-10 w-10 bg-background border shadow-md rounded-lg hover:bg-muted"
+              onClick={() => setIsSidebarOpen(true)}
+              title="Expand Shapes Panel"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          )}
         </Panel>
 
         <Panel position="top-center" className="mt-4 bg-background/80 backdrop-blur p-1 rounded-lg border shadow-sm flex gap-1 items-center">

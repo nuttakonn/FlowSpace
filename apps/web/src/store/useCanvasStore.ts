@@ -210,12 +210,28 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       });
       
       localYNodes.observe(() => { 
-        const updatedNodes = Array.from(localYNodes.values()).map(n => n as Node);
+        const currentNodes = get().nodes;
+        const updatedNodes = Array.from(localYNodes.values()).map(n => {
+          const node = n as Node;
+          const localNode = currentNodes.find(cn => cn.id === node.id);
+          return {
+            ...node,
+            selected: localNode ? localNode.selected : false
+          };
+        });
         set({ nodes: updatedNodes }); 
       });
       
       localYEdges.observe(() => { 
-        const updatedEdges = Array.from(localYEdges.values()).map(e => e as Edge);
+        const currentEdges = get().edges;
+        const updatedEdges = Array.from(localYEdges.values()).map(e => {
+          const edge = e as Edge;
+          const localEdge = currentEdges.find(ce => ce.id === edge.id);
+          return {
+            ...edge,
+            selected: localEdge ? localEdge.selected : false
+          };
+        });
         set({ edges: updatedEdges }); 
       });
 
@@ -493,11 +509,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         get().updateSelection(updatedNodes.filter(n => n.selected).map(n => n.id));
         set({ nodes: updatedNodes });
 
-        // Sync changes back to Yjs
+        // Sync changes back to Yjs (stripping selection state)
         realChanges.forEach(change => {
             if (change.type === 'position') {
                 const node = updatedNodes.find(n => n.id === change.id);
-                if (node) yNodes.set(change.id, node);
+                if (node) {
+                    const { selected, ...nodeToSave } = node;
+                    yNodes.set(change.id, nodeToSave);
+                }
             }
             if (change.type === 'dimensions' && change.dimensions) {
                 const node = yNodes.get(change.id);
@@ -510,7 +529,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
                         
                         const updatedData = { ...metadata, width: change.dimensions.width, height: change.dimensions.height };
                         const updatedNode = { ...node, id: change.id, data: updatedData };
-                        yNodes.set(change.id, updatedNode);
+                        const { selected, ...nodeToSave } = updatedNode;
+                        yNodes.set(change.id, nodeToSave);
                         get().saveNodePosition(updatedNode); // Persist to backend
                     }
                 }
@@ -568,7 +588,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const node = yNodes.get(id);
       if (node) {
         const updatedNode = { ...node, data: { ...node.data, label } };
-        yNodes.set(id, updatedNode);
+        const { selected, ...nodeToSave } = updatedNode;
+        yNodes.set(id, nodeToSave);
         
         const realId = get().resolveRealId(id);
         if (!realId.startsWith('temp-')) {
@@ -585,7 +606,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const node = yNodes.get(id);
       if (node) {
         const updatedNode = { ...node, data: { ...node.data, color } };
-        yNodes.set(id, updatedNode);
+        const { selected, ...nodeToSave } = updatedNode;
+        yNodes.set(id, nodeToSave);
         
         const realId = get().resolveRealId(id);
         if (!realId.startsWith('temp-')) {
@@ -600,7 +622,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     saveNodePosition: (node) => {
       const { yNodes } = get();
       if (node.id.startsWith('preview-')) return;
-      yNodes.set(node.id, node);
+      const { selected, ...nodeToSave } = node;
+      yNodes.set(node.id, nodeToSave);
       get().enqueueMutation({ type: 'UPDATE_NODE', tempId: node.id, payload: { x: node.position.x, y: node.position.y, metadata: JSON.stringify(node.data) } });
     },
 
@@ -650,7 +673,13 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       toast.success(`Pasted ${clipboard.nodes.length} nodes`);
     },
 
-    selectAll: () => { const { yNodes, yEdges } = get(); yNodes.forEach((node, id) => yNodes.set(id, { ...node, selected: true })); yEdges.forEach((edge, id) => yEdges.set(id, { ...edge, selected: true })); },
+    selectAll: () => {
+      const { nodes, edges } = get();
+      set({
+        nodes: nodes.map(n => ({ ...n, selected: true })),
+        edges: edges.map(e => ({ ...e, selected: true }))
+      });
+    },
 
     saveVersion: async (name, description) => {
       const { boardId, nodes, edges, yDoc, boardType } = get();

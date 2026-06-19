@@ -16,14 +16,23 @@ This document outlines the architecture required to achieve real-time collaborat
 
 ---
 
-## 2. Frontend State Model
+## 2. Frontend State Model & Selection Isolation
 
-Handling 100k nodes requires a strict separation of local viewport state and shared collaborative state.
+Handling 100k nodes requires a strict separation of local viewport/visual state and shared collaborative state.
 
 ### Yjs Shared State (The Source of Truth)
 The CRDT document (`Y.Doc`) holds the authoritative state of the board.
-- `yNodes`: A `Y.Map` where keys are Node IDs and values are Node objects.
+- `yNodes`: A `Y.Map` where keys are Node IDs and values are Node objects (with visual properties like `selected` stripped).
 - `yEdges`: A `Y.Map` where keys are Edge IDs and values are Edge objects.
+
+### Local-Only Visual States (Selection Isolation)
+Visual states that are transient and client-specific (e.g. selection focus outlines, resizing handles, and floating node action toolbars) are **strictly isolated** from the shared Yjs document:
+1. **Property Stripping**: The `selected` state of nodes is stripped out before writing updates to the `yNodes`/`yEdges` maps (e.g., in `onNodesChange`, `updateNodeColor`, `saveNodePosition`).
+2. **Observe Merging**: In the `localYNodes.observe` and `localYEdges.observe` listeners, updates from Yjs are merged into Zustand while preserving the current local `selected` properties to prevent multiple nodes from showing active outlines across users.
+3. **Local Toolbars**: Selection toolbars are rendered floating directly on selected nodes but toggle visibility locally via this isolated state.
+
+### Collapsible Shapes Toolbar
+The left-hand shapes selector (`FloatingToolbar`) can be collapsed using the toggle trigger button (`ChevronLeft`/`ChevronRight`) at the canvas edge, allowing users to hide visual panel clutter when reviewing boards.
 
 ### React Flow State (The View Model)
 React Flow expects an array of `Node` and `Edge` objects. We do **not** store all 100k nodes in React Flow's state simultaneously.
@@ -31,17 +40,18 @@ React Flow expects an array of `Node` and `Edge` objects. We do **not** store al
 ```typescript
 // Zustand Store bridging Yjs and React Flow
 interface CanvasState {
-  // Only nodes currently visible or near the viewport
-  visibleNodes: Node[]; 
-  visibleEdges: Edge[];
-  
-  // Viewport tracking
-  viewport: { x: number; y: number; zoom: number };
+  nodes: Node[]; 
+  edges: Edge[];
+  past: Mutation[];
+  future: Mutation[];
+  mutationQueue: Mutation[];
+  syncStatus: 'idle' | 'saving' | 'saved' | 'failed';
   
   // Actions
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
-  updateViewport: (viewport: Viewport) => void;
+  addNode: (type: string, position: { x: number; y: number }) => void;
+  selectAll: () => void;
 }
 ```
 
