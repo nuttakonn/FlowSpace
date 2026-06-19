@@ -9,7 +9,7 @@ using System.Text;
 
 namespace FlowSpace.Application.Interop.Commands.ExportBoard;
 
-public record ExportBoardCommand(Guid BoardId, string Format, string JwtToken = "", string FrontendBaseUrl = "") : ICommand<ExportResponse>;
+public record ExportBoardCommand(Guid BoardId, string Format, string JwtToken = "", string FrontendBaseUrl = "", string ShareToken = "") : ICommand<ExportResponse>;
 
 public class ExportBoardCommandHandler : ICommandHandler<ExportBoardCommand, ExportResponse>
 {
@@ -57,23 +57,23 @@ public class ExportBoardCommandHandler : ICommandHandler<ExportBoardCommand, Exp
                 fileName += ".drawio";
                 break;
             case "png":
-                data = await _exportService.ExportToPngAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, cancellationToken);
+                data = await _exportService.ExportToPngAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, command.ShareToken, cancellationToken);
                 contentType = "image/png";
                 fileName += ".png";
                 break;
             case "jpg":
             case "jpeg":
-                data = await _exportService.ExportToJpgAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, cancellationToken);
+                data = await _exportService.ExportToJpgAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, command.ShareToken, cancellationToken);
                 contentType = "image/jpeg";
                 fileName += ".jpg";
                 break;
             case "pdf":
-                data = await _exportService.ExportToPdfAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, cancellationToken);
+                data = await _exportService.ExportToPdfAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, command.ShareToken, cancellationToken);
                 contentType = "application/pdf";
                 fileName += ".pdf";
                 break;
             case "svg":
-                var svgContent = await _exportService.ExportToSvgAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, cancellationToken);
+                var svgContent = await _exportService.ExportToSvgAsync(command.BoardId, command.JwtToken, command.FrontendBaseUrl, command.ShareToken, cancellationToken);
                 data = Encoding.UTF8.GetBytes(svgContent);
                 contentType = "image/svg+xml";
                 fileName += ".svg";

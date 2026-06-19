@@ -84,7 +84,7 @@ interface CanvasState {
   templates: BoardTemplateResponse[];
   showCurrentInPreview: boolean;
 
-  initialize: (boardId: string, workspaceId: string, accessToken: string, userName: string, userId: string, boardType: string, token?: string, templateId?: string) => void;
+  initialize: (boardId: string, workspaceId: string, accessToken: string, userName: string, userId: string, boardType: string, token?: string, templateId?: string, createdAt?: string) => void;
   disconnect: () => void;
   loadViewportElements: (x: number, y: number, width: number, height: number) => Promise<void>;
   
@@ -141,7 +141,7 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
     hubConnection: null, remoteUsers: {}, isGeneratingAi: false, aiStatus: '',
     previewNodes: [], previewEdges: [], aiHistory: [], templates: [], showCurrentInPreview: true,
 
-    initialize: (boardId, workspaceId, accessToken, userName, userId, boardType, token, templateId) => {
+    initialize: (boardId, workspaceId, accessToken, userName, userId, boardType, token, templateId, createdAt) => {
       const state = get();
       if (state.boardId === boardId && state.hubConnection?.state === signalR.HubConnectionState.Connected) {
         return;
@@ -275,8 +275,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         })));
 
         // Seeding templates if the board is brand new and empty
-        setTimeout(() => {
-          if (localYNodes.size === 0 && templateId && templateId !== 'blank-flowchart') {
+        setTimeout(async () => {
+          let dbHasElements = false;
+          try {
+            const dbElements = await apiClient.get<DiagramResponse>(`/boards/${boardId}/elements`);
+            dbHasElements = dbElements.data.nodes.length > 0 || dbElements.data.edges.length > 0;
+          } catch (e) {
+            console.error("Failed to check if board is empty", e);
+          }
+
+          const isNewlyCreated = createdAt ? (new Date().getTime() - new Date(createdAt).getTime() < 30000) : false;
+
+          if (localYNodes.size === 0 && !dbHasElements && isNewlyCreated && templateId && templateId !== 'blank-flowchart') {
             console.log("Seeding template:", templateId);
             if (templateId === 'simple-flowchart') {
               const id1 = `temp-${uuidv4()}`;
@@ -712,16 +722,34 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
                     }
                 }
             }
+            if (change.type === 'remove') {
+                if (yNodes.has(change.id)) {
+                    yNodes.delete(change.id);
+                    get().enqueueMutation({ type: 'DELETE_NODE', tempId: change.id, payload: {} });
+                }
+            }
         });
       }
     },
     
     onEdgesChange: (changes) => {
-      const { previewEdges, edges } = get();
+      const { previewEdges, edges, yEdges } = get();
       const previewChanges = changes.filter(c => 'id' in c && c.id.startsWith('preview-'));
       const realChanges = changes.filter(c => !('id' in c) || !c.id.startsWith('preview-'));
       if (previewChanges.length > 0) set({ previewEdges: applyEdgeChanges(previewChanges, previewEdges) });
-      if (realChanges.length > 0) set({ edges: applyEdgeChanges(realChanges, edges) });
+      if (realChanges.length > 0) {
+        const updatedEdges = applyEdgeChanges(realChanges, edges);
+        set({ edges: updatedEdges });
+
+        realChanges.forEach(change => {
+            if (change.type === 'remove') {
+                if (yEdges.has(change.id)) {
+                    yEdges.delete(change.id);
+                    get().enqueueMutation({ type: 'DELETE_EDGE', tempId: change.id, payload: {} });
+                }
+            }
+        });
+      }
     },
 
     onConnect: (connection) => {
@@ -815,8 +843,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       const rEdgesToDelete = edgesToDelete.filter(e => !e.id.startsWith('preview-'));
       if (rNodesToDelete.length > 0 || rEdgesToDelete.length > 0) {
         get().commitHistory();
-        rNodesToDelete.forEach(node => { yNodes.delete(node.id); get().enqueueMutation({ type: 'DELETE_NODE', tempId: node.id, payload: {} }); });
-        rEdgesToDelete.forEach(edge => { yEdges.delete(edge.id); get().enqueueMutation({ type: 'DELETE_EDGE', tempId: edge.id, payload: {} }); });
+        rNodesToDelete.forEach(node => {
+          if (yNodes.has(node.id)) {
+            yNodes.delete(node.id);
+            get().enqueueMutation({ type: 'DELETE_NODE', tempId: node.id, payload: {} });
+          }
+        });
+        rEdgesToDelete.forEach(edge => {
+          if (yEdges.has(edge.id)) {
+            yEdges.delete(edge.id);
+            get().enqueueMutation({ type: 'DELETE_EDGE', tempId: edge.id, payload: {} });
+          }
+        });
       }
     },
 

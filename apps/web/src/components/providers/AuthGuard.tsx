@@ -4,7 +4,8 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const publicRoutes = ["/login", "/register", "/"];
+const authRoutes = ["/login", "/register"];
+const publicRoutes = ["/"];
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore();
@@ -13,13 +14,17 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Check if the current route is public
-    const isPublicRoute = publicRoutes.includes(pathname);
+    const isAuthRoute = authRoutes.includes(pathname);
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasToken = urlParams.has("token");
+    const isPublicRoute = publicRoutes.includes(pathname) || 
+                          pathname.startsWith("/shared/") ||
+                          (pathname.startsWith("/boards/") && hasToken);
 
-    if (!isAuthenticated && !isPublicRoute) {
+    if (!isAuthenticated && !isAuthRoute && !isPublicRoute) {
       router.push("/login");
-    } else if (isAuthenticated && isPublicRoute && pathname !== "/") {
-      // Redirect logged-in users away from auth pages
+    } else if (isAuthenticated && isAuthRoute) {
+      // Redirect logged-in users away from auth pages only
       router.push("/dashboard");
     } else {
       setIsReady(true);

@@ -79,6 +79,13 @@ public class WorkspaceRepository : Repository<FlowSpace.Domain.Entities.Workspac
             .Where(wm => wm.WorkspaceId == workspaceId)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<FlowSpace.Domain.Entities.Workspace?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    {
+        return await DbContext.Workspaces
+            .Include(w => w.Members)
+            .FirstOrDefaultAsync(w => w.Name.ToLower() == name.ToLower(), cancellationToken);
+    }
 }
 
 public class BoardRepository : Repository<FlowSpace.Domain.Entities.Board>, IBoardRepository

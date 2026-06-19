@@ -28,6 +28,7 @@ interface Board {
   workspaceId: string;
   name: string;
   type: string;
+  createdAt?: string;
 }
 
 export default function BoardEditorPage() {
@@ -171,6 +172,7 @@ export default function BoardEditorPage() {
             userName={user?.displayName || "Guest"} 
             userId={user?.id || "guest"} 
             token={shareToken}
+            createdAt={board.createdAt}
           />
         </div>
       </main>

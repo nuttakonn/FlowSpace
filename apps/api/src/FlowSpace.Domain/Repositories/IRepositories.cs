@@ -19,6 +19,7 @@ public interface IWorkspaceRepository : IRepository<Workspace>
 {
     Task<List<Workspace>> ListByUserIdAsync(Guid userId, CancellationToken cancellationToken = default);
     Task<List<WorkspaceMember>> GetMembersAsync(Guid workspaceId, CancellationToken cancellationToken = default);
+    Task<Workspace?> GetByNameAsync(string name, CancellationToken cancellationToken = default);
 }
 public interface IBoardRepository : IRepository<Board> 
 {

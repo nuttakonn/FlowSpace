@@ -49,6 +49,7 @@ interface FlowchartCanvasProps {
   userName: string;
   userId: string;
   token?: string;
+  createdAt?: string;
 }
 
 export function FlowchartCanvas(props: FlowchartCanvasProps) {
@@ -59,7 +60,7 @@ export function FlowchartCanvas(props: FlowchartCanvasProps) {
   );
 }
 
-function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, userId, token }: FlowchartCanvasProps) {
+function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, userId, token, createdAt }: FlowchartCanvasProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -95,7 +96,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
   useEffect(() => {
     console.log("🚀 FlowSpace Engine v2.5 Initializing Board:", boardId);
     const templateId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('template') || undefined : undefined;
-    initialize(boardId, workspaceId, accessToken, userName, userId, "Flowchart", token, templateId);
+    initialize(boardId, workspaceId, accessToken, userName, userId, "Flowchart", token, templateId, createdAt);
 
     const handleOnline = () => {
       processQueue();

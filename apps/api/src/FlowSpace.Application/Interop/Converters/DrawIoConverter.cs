@@ -1,7 +1,8 @@
 using System.Xml;
-using FlowSpace.Domain.Entities;
-using System.Text;
 using System.Xml.Linq;
+using System.Text;
+using System.Text.Json;
+using FlowSpace.Domain.Entities;
 
 namespace FlowSpace.Application.Interop.Converters;
 
@@ -13,6 +14,21 @@ public static class DrawIoConverter
         XmlResolver = null
     };
 
+    private static string GetNodeLabel(Node node)
+    {
+        if (string.IsNullOrEmpty(node.Metadata)) return node.Type;
+        try
+        {
+            using var doc = JsonDocument.Parse(node.Metadata);
+            if (doc.RootElement.TryGetProperty("label", out var labelProp))
+            {
+                return labelProp.GetString() ?? node.Type;
+            }
+        }
+        catch {}
+        return node.Type;
+    }
+
     public static string ToDrawIoXml(Board board, List<Node> nodes, List<Edge> edges)
     {
         var root = new XElement("mxGraphModel",
@@ -21,7 +37,7 @@ public static class DrawIoConverter
                 new XElement("mxCell", new XAttribute("id", "1"), new XAttribute("parent", "0")),
                 nodes.Select(n => new XElement("mxCell",
                     new XAttribute("id", n.Id.ToString()),
-                    new XAttribute("value", n.Type),
+                    new XAttribute("value", GetNodeLabel(n)),
                     new XAttribute("style", GetDrawIoStyle(n)),
                     new XAttribute("vertex", "1"),
                     new XAttribute("parent", "1"),

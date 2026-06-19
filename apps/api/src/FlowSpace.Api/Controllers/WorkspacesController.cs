@@ -4,6 +4,7 @@ using FlowSpace.Application.Workspaces.Commands.DeleteWorkspace;
 using FlowSpace.Application.Workspaces.Commands.UpdateWorkspace;
 using FlowSpace.Application.Workspaces.Queries.GetWorkspace;
 using FlowSpace.Application.Workspaces.Queries.ListWorkspaces;
+using FlowSpace.Application.Workspaces.Queries.FindWorkspace;
 using FlowSpace.Contracts.Workspaces;
 using FlowSpace.Domain.Authorization;
 using MediatR;
@@ -39,6 +40,16 @@ public class WorkspacesController : ApiController
     {
         var query = new GetWorkspaceQuery(id);
         var result = await _sender.Send(query);
+
+        return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
+    }
+
+    [HttpGet("lookup")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Lookup([FromQuery] string query)
+    {
+        var findQuery = new FindWorkspaceQuery(query);
+        var result = await _sender.Send(findQuery);
 
         return result.IsSuccess ? Ok(result.Value) : HandleFailure(result);
     }

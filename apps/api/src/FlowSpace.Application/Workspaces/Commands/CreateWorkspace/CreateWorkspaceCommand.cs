@@ -23,7 +23,22 @@ public class CreateWorkspaceCommandHandler : ICommandHandler<CreateWorkspaceComm
 
     public async Task<Result<WorkspaceResponse>> Handle(CreateWorkspaceCommand command, CancellationToken cancellationToken)
     {
-        var workspace = Workspace.Create(Guid.NewGuid(), command.Name, command.OwnerId);
+        var normalizedName = command.Name.Trim();
+        byte[] nameBytes = System.Text.Encoding.UTF8.GetBytes(normalizedName);
+        byte[] hashBytes = System.Security.Cryptography.MD5.HashData(nameBytes);
+        Guid workspaceId = new Guid(hashBytes);
+
+        var existingById = await _workspaceRepository.GetByIdAsync(workspaceId, cancellationToken);
+        var existingByName = await _workspaceRepository.GetByNameAsync(normalizedName, cancellationToken);
+
+        if (existingById is not null || existingByName is not null)
+        {
+            return Result.Failure<WorkspaceResponse>(new Error(
+                "Workspace.AlreadyExists", 
+                "A workspace with this name or ID already exists."));
+        }
+
+        var workspace = Workspace.Create(workspaceId, command.Name, command.OwnerId);
         
         _workspaceRepository.Add(workspace);
         
