@@ -31,7 +31,19 @@ public class InteropController : ApiController
             token = authHeader.Substring("Bearer ".Length).Trim();
         }
 
-        var command = new ExportBoardCommand(boardId, format, token);
+        string frontendBaseUrl = "";
+        string referer = Request.Headers["Referer"].ToString();
+        if (!string.IsNullOrEmpty(referer))
+        {
+            try
+            {
+                var uri = new Uri(referer);
+                frontendBaseUrl = uri.GetLeftPart(UriPartial.Authority);
+            }
+            catch {}
+        }
+
+        var command = new ExportBoardCommand(boardId, format, token, frontendBaseUrl);
         var result = await _sender.Send(command);
 
         if (result.IsFailure) return HandleFailure(result);

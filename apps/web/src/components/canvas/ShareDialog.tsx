@@ -39,6 +39,18 @@ export function ShareDialog({ boardId }: ShareDialogProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  const getDisplayUrl = (url: string) => {
+    if (typeof window !== 'undefined') {
+      try {
+        const parsed = new URL(url);
+        return `${window.location.origin}${parsed.pathname}${parsed.search}`;
+      } catch {
+        return url;
+      }
+    }
+    return url;
+  };
+
   const loadSharingInfo = async () => {
     setIsLoading(true);
     try {
@@ -85,7 +97,7 @@ export function ShareDialog({ boardId }: ShareDialogProps) {
   };
 
   const copyToClipboard = (url: string, id: string) => {
-    navigator.clipboard.writeText(url);
+    navigator.clipboard.writeText(getDisplayUrl(url));
     setCopiedId(id);
     toast.success("Link copied to clipboard");
     setTimeout(() => setCopiedId(null), 2000);
@@ -175,7 +187,14 @@ export function ShareDialog({ boardId }: ShareDialogProps) {
                           {link.role === 4 && "Viewer"}
                         </Badge>
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-mono text-muted-foreground truncate max-w-[200px]">{link.url}</span>
+                          <a 
+                            href={getDisplayUrl(link.url)} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-[10px] font-mono text-primary hover:underline truncate max-w-[200px]"
+                          >
+                            {getDisplayUrl(link.url)}
+                          </a>
                           {link.expiresAt && (
                             <span className="text-[8px] text-amber-500 font-bold flex items-center gap-1">
                               <Clock className="h-2 w-2" /> Expires: {new Date(link.expiresAt).toLocaleDateString()}

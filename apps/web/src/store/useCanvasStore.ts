@@ -384,6 +384,151 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
               
               get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
               get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id1, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
+            } else if (templateId === 'uml-class-diagram') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'rectangle', position: { x: 150, y: 80 }, data: { label: 'class User\n---\n- id: Guid\n- email: string\n---\n+ Register()\n+ Login()', width: 220, height: 140 } };
+              const n2: Node = { id: id2, type: 'rectangle', position: { x: 480, y: 80 }, data: { label: 'class Account\n---\n- userId: Guid\n- isActive: bool\n---\n+ Activate()\n+ Suspend()', width: 220, height: 140 } };
+              const n3: Node = { id: id3, type: 'rectangle', position: { x: 150, y: 300 }, data: { label: 'class Profile\n---\n- name: string\n- avatarUrl: string\n---\n+ UpdateInfo()', width: 220, height: 140 } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Rectangle', x: 150, y: 80, metadata: JSON.stringify({ label: 'class User\n---\n- id: Guid\n- email: string\n---\n+ Register()\n+ Login()', width: 220, height: 140 }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Rectangle', x: 480, y: 80, metadata: JSON.stringify({ label: 'class Account\n---\n- userId: Guid\n- isActive: bool\n---\n+ Activate()\n+ Suspend()', width: 220, height: 140 }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Rectangle', x: 150, y: 300, metadata: JSON.stringify({ label: 'class Profile\n---\n- name: string\n- avatarUrl: string\n---\n+ UpdateInfo()', width: 220, height: 140 }) } });
+              
+              const e1Id = `temp-${uuidv4()}`;
+              const e2Id = `temp-${uuidv4()}`;
+              const e1: Edge = { id: e1Id, source: id1, target: id2, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e2: Edge = { id: e2Id, source: id1, target: id3, sourceHandle: 's-bottom', targetHandle: 't-top', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              
+              localYEdges.set(e1Id, e1);
+              localYEdges.set(e2Id, e2);
+              
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id1, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
+            } else if (templateId === 'kanban-board') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              const id4 = `temp-${uuidv4()}`;
+              const id5 = `temp-${uuidv4()}`;
+              const id6 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'rectangle', position: { x: 100, y: 50 }, data: { label: 'To Do', width: 200, height: 50, color: 'bg-slate-100 text-slate-800 font-bold border-slate-300' } };
+              const n2: Node = { id: id2, type: 'rectangle', position: { x: 350, y: 50 }, data: { label: 'In Progress', width: 200, height: 50, color: 'bg-blue-100 text-blue-800 font-bold border-blue-300' } };
+              const n3: Node = { id: id3, type: 'rectangle', position: { x: 600, y: 50 }, data: { label: 'Done', width: 200, height: 50, color: 'bg-green-100 text-green-800 font-bold border-green-300' } };
+              
+              const n4: Node = { id: id4, type: 'stickynote', position: { x: 100, y: 120 }, data: { label: 'Design landing page mockup', width: 200, height: 100, color: 'bg-yellow-50/90' } };
+              const n5: Node = { id: id5, type: 'stickynote', position: { x: 350, y: 120 }, data: { label: 'Develop workspace settings UI', width: 200, height: 100, color: 'bg-yellow-50/90' } };
+              const n6: Node = { id: id6, type: 'stickynote', position: { x: 600, y: 120 }, data: { label: 'Initialize GitHub repository', width: 200, height: 100, color: 'bg-yellow-50/90' } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              localYNodes.set(id4, n4);
+              localYNodes.set(id5, n5);
+              localYNodes.set(id6, n6);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Rectangle', x: 100, y: 50, metadata: JSON.stringify({ label: 'To Do', width: 200, height: 50, color: 'bg-slate-100 text-slate-800 font-bold border-slate-300' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Rectangle', x: 350, y: 50, metadata: JSON.stringify({ label: 'In Progress', width: 200, height: 50, color: 'bg-blue-100 text-blue-800 font-bold border-blue-300' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Rectangle', x: 600, y: 50, metadata: JSON.stringify({ label: 'Done', width: 200, height: 50, color: 'bg-green-100 text-green-800 font-bold border-green-300' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id4, payload: { type: 'StickyNote', x: 100, y: 120, metadata: JSON.stringify({ label: 'Design landing page mockup', width: 200, height: 100, color: 'bg-yellow-50/90' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id5, payload: { type: 'StickyNote', x: 350, y: 120, metadata: JSON.stringify({ label: 'Develop workspace settings UI', width: 200, height: 100, color: 'bg-yellow-50/90' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id6, payload: { type: 'StickyNote', x: 600, y: 120, metadata: JSON.stringify({ label: 'Initialize GitHub repository', width: 200, height: 100, color: 'bg-yellow-50/90' }) } });
+            } else if (templateId === 'user-journey-map') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'circle', position: { x: 100, y: 150 }, data: { label: '1. Discovery\n(User discovers FlowSpace through Product Hunt)', width: 160, height: 160, color: 'border-yellow-400 bg-yellow-50/10' } };
+              const n2: Node = { id: id2, type: 'circle', position: { x: 350, y: 150 }, data: { label: '2. Register\n(Fills onboarding details and invites colleagues)', width: 160, height: 160, color: 'border-blue-400 bg-blue-50/10' } };
+              const n3: Node = { id: id3, type: 'circle', position: { x: 600, y: 150 }, data: { label: '3. Create Board\n(Starts collaborating in real-time on canvas)', width: 160, height: 160, color: 'border-green-400 bg-green-50/10' } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Circle', x: 100, y: 150, metadata: JSON.stringify({ label: '1. Discovery\n(User discovers FlowSpace through Product Hunt)', width: 160, height: 160, color: 'border-yellow-400 bg-yellow-50/10' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Circle', x: 350, y: 150, metadata: JSON.stringify({ label: '2. Register\n(Fills onboarding details and invites colleagues)', width: 160, height: 160, color: 'border-blue-400 bg-blue-50/10' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Circle', x: 600, y: 150, metadata: JSON.stringify({ label: '3. Create Board\n(Starts collaborating in real-time on canvas)', width: 160, height: 160, color: 'border-green-400 bg-green-50/10' }) } });
+              
+              const e1Id = `temp-${uuidv4()}`;
+              const e2Id = `temp-${uuidv4()}`;
+              const e1: Edge = { id: e1Id, source: id1, target: id2, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#eab308' } };
+              const e2: Edge = { id: e2Id, source: id2, target: id3, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              
+              localYEdges.set(e1Id, e1);
+              localYEdges.set(e2Id, e2);
+              
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id2, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
+            } else if (templateId === 'concept-mindmap') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              const id4 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'circle', position: { x: 350, y: 200 }, data: { label: 'FlowSpace Core', width: 180, height: 180, color: 'border-primary border-4 bg-primary/5 text-lg font-bold' } };
+              const n2: Node = { id: id2, type: 'circle', position: { x: 100, y: 80 }, data: { label: 'Real-time Canvas\n(Yjs / WebSockets)', width: 140, height: 140, color: 'border-yellow-400 bg-yellow-50/10' } };
+              const n3: Node = { id: id3, type: 'circle', position: { x: 600, y: 80 }, data: { label: 'Backend API\n(ASP.NET Core 10 / CQRS)', width: 140, height: 140, color: 'border-blue-400 bg-blue-50/10' } };
+              const n4: Node = { id: id4, type: 'circle', position: { x: 370, y: 430 }, data: { label: 'Collaborative UI\n(Next.js / Tailwind)', width: 140, height: 140, color: 'border-green-400 bg-green-50/10' } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              localYNodes.set(id4, n4);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Circle', x: 350, y: 200, metadata: JSON.stringify({ label: 'FlowSpace Core', width: 180, height: 180, color: 'border-primary border-4 bg-primary/5 text-lg font-bold' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Circle', x: 100, y: 80, metadata: JSON.stringify({ label: 'Real-time Canvas\n(Yjs / WebSockets)', width: 140, height: 140, color: 'border-yellow-400 bg-yellow-50/10' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Circle', x: 600, y: 80, metadata: JSON.stringify({ label: 'Backend API\n(ASP.NET Core 10 / CQRS)', width: 140, height: 140, color: 'border-blue-400 bg-blue-50/10' }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id4, payload: { type: 'Circle', x: 370, y: 430, metadata: JSON.stringify({ label: 'Collaborative UI\n(Next.js / Tailwind)', width: 140, height: 140, color: 'border-green-400 bg-green-50/10' }) } });
+              
+              const e1Id = `temp-${uuidv4()}`;
+              const e2Id = `temp-${uuidv4()}`;
+              const e3Id = `temp-${uuidv4()}`;
+              const e1: Edge = { id: e1Id, source: id1, target: id2, sourceHandle: 's-left', targetHandle: 't-bottom', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e2: Edge = { id: e2Id, source: id1, target: id3, sourceHandle: 's-right', targetHandle: 't-bottom', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e3: Edge = { id: e3Id, source: id1, target: id4, sourceHandle: 's-bottom', targetHandle: 't-top', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              
+              localYEdges.set(e1Id, e1);
+              localYEdges.set(e2Id, e2);
+              localYEdges.set(e3Id, e3);
+              
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-left', targetHandle: 't-bottom' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id1, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-bottom' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e3Id, payload: { sourceNodeId: id1, targetNodeId: id4, metadata: JSON.stringify({ sourceHandle: 's-bottom', targetHandle: 't-top' }) } });
+            } else if (templateId === 'project-timeline') {
+              const id1 = `temp-${uuidv4()}`;
+              const id2 = `temp-${uuidv4()}`;
+              const id3 = `temp-${uuidv4()}`;
+              
+              const n1: Node = { id: id1, type: 'rectangle', position: { x: 100, y: 150 }, data: { label: 'Phase 1: Planning\n- Define scope\n- Wireframe design', width: 200, height: 100 } };
+              const n2: Node = { id: id2, type: 'rectangle', position: { x: 380, y: 150 }, data: { label: 'Phase 2: Development\n- Build API services\n- Real-time sync setup', width: 200, height: 100 } };
+              const n3: Node = { id: id3, type: 'rectangle', position: { x: 660, y: 150 }, data: { label: 'Phase 3: Launch\n- Integration tests\n- Production deploy', width: 200, height: 100 } };
+              
+              localYNodes.set(id1, n1);
+              localYNodes.set(id2, n2);
+              localYNodes.set(id3, n3);
+              
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id1, payload: { type: 'Rectangle', x: 100, y: 150, metadata: JSON.stringify({ label: 'Phase 1: Planning\n- Define scope\n- Wireframe design', width: 200, height: 100 }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id2, payload: { type: 'Rectangle', x: 380, y: 150, metadata: JSON.stringify({ label: 'Phase 2: Development\n- Build API services\n- Real-time sync setup', width: 200, height: 100 }) } });
+              get().enqueueMutation({ type: 'CREATE_NODE', tempId: id3, payload: { type: 'Rectangle', x: 660, y: 150, metadata: JSON.stringify({ label: 'Phase 3: Launch\n- Integration tests\n- Production deploy', width: 200, height: 100 }) } });
+              
+              const e1Id = `temp-${uuidv4()}`;
+              const e2Id = `temp-${uuidv4()}`;
+              const e1: Edge = { id: e1Id, source: id1, target: id2, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              const e2: Edge = { id: e2Id, source: id2, target: id3, sourceHandle: 's-right', targetHandle: 't-left', markerEnd: { type: MarkerType.ArrowClosed, color: '#3b82f6' } };
+              
+              localYEdges.set(e1Id, e1);
+              localYEdges.set(e2Id, e2);
+              
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e1Id, payload: { sourceNodeId: id1, targetNodeId: id2, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
+              get().enqueueMutation({ type: 'CREATE_EDGE', tempId: e2Id, payload: { sourceNodeId: id2, targetNodeId: id3, metadata: JSON.stringify({ sourceHandle: 's-right', targetHandle: 't-left' }) } });
             }
           }
         }, 1000);

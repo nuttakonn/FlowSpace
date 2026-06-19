@@ -29,6 +29,11 @@ const TEMPLATES: Template[] = [
   { id: 'system-architecture', name: 'System Architecture', description: 'Plan your cloud or software infrastructure.', category: 'Engineering', boardType: 'Flowchart' },
   { id: 'brainstorming', name: 'Brainstorming Session', description: 'Collaborative space for team ideas.', category: 'Product & Design', boardType: 'Flowchart' },
   { id: 'org-chart', name: 'Organization Chart', description: 'Map out team structure and reporting.', category: 'Business & Management', boardType: 'Flowchart' },
+  { id: 'uml-class-diagram', name: 'UML Class Diagram', description: 'Model software classes, attributes, and relationships.', category: 'Engineering', boardType: 'Flowchart' },
+  { id: 'kanban-board', name: 'Kanban Board', description: 'Track task status and project progress visually.', category: 'Business & Management', boardType: 'Whiteboard' },
+  { id: 'user-journey-map', name: 'User Journey Map', description: 'Map user steps, touchpoints, and emotions.', category: 'Product & Design', boardType: 'Whiteboard' },
+  { id: 'concept-mindmap', name: 'Concept Mindmap', description: 'Structure thoughts and brainstorm central concepts.', category: 'Product & Design', boardType: 'Mindmap' },
+  { id: 'project-timeline', name: 'Project Timeline', description: 'Sequence deliverables and milestones left-to-right.', category: 'Business & Management', boardType: 'Flowchart' },
 ];
 
 const CATEGORIES = ['All', 'Engineering', 'Product & Design', 'Business & Management'];

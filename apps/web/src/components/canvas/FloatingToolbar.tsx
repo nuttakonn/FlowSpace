@@ -51,7 +51,13 @@ import {
   Container,
   HardDrive,
   Network,
-  Smartphone
+  Smartphone,
+  Triangle,
+  Hexagon,
+  Grid,
+  Play,
+  FormInput,
+  CreditCard
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -142,48 +148,58 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
   const [iconSearch, setIconSearch] = useState('');
 
   const general = [
-    { type: 'Rectangle', icon: Square, label: 'Rectangle' },
-    { type: 'Rectangle', icon: Square, label: 'Rounded', data: { color: 'rounded-[30px]' } },
-    { type: 'Circle', icon: Circle, label: 'Circle' },
-    { type: 'Circle', icon: Circle, label: 'Ellipse', data: { width: 180, height: 100 } },
-    { type: 'Diamond', icon: Diamond, label: 'Diamond' },
-    { type: 'Text', icon: Type, label: 'Text' },
+    { type: 'rectangle', icon: Square, label: 'Rectangle' },
+    { type: 'rectangle', icon: Square, label: 'Rounded', data: { color: 'rounded-[30px]' } },
+    { type: 'circle', icon: Circle, label: 'Circle' },
+    { type: 'circle', icon: Circle, label: 'Ellipse', data: { width: 180, height: 100 } },
+    { type: 'diamond', icon: Diamond, label: 'Diamond' },
+    { type: 'triangle', icon: Triangle, label: 'Triangle' },
+    { type: 'hexagon', icon: Hexagon, label: 'Hexagon' },
+    { type: 'parallelogram', icon: Grid, label: 'Parallelogram' },
+    { type: 'text', icon: Type, label: 'Text' },
   ];
 
   const flowchart = [
-    { type: 'Rectangle', icon: Square, label: 'Process' },
-    { type: 'Diamond', icon: Diamond, label: 'Decision' },
-    { type: 'Rectangle', icon: FileText, label: 'Document', data: { color: 'border-b-8 border-b-primary/50' } },
-    { type: 'Database', icon: Database, label: 'Data' },
-    { type: 'Circle', icon: Circle, label: 'Start / End', data: { width: 80, height: 80, color: 'border-4' } },
-    { type: 'Cloud', icon: Cloud, label: 'Cloud' },
+    { type: 'rectangle', icon: Square, label: 'Process' },
+    { type: 'diamond', icon: Diamond, label: 'Decision' },
+    { type: 'rectangle', icon: FileText, label: 'Document', data: { color: 'border-b-8 border-b-primary/50' } },
+    { type: 'database', icon: Database, label: 'Data' },
+    { type: 'circle', icon: Circle, label: 'Start / End', data: { width: 80, height: 80, color: 'border-4' } },
+    { type: 'cloud', icon: Cloud, label: 'Cloud' },
+    { type: 'parallelogram', icon: Grid, label: 'Input/Output', data: { label: 'Input/Output' } },
+    { type: 'hexagon', icon: Hexagon, label: 'Preparation', data: { label: 'Preparation' } },
+    { type: 'rectangle', icon: Square, label: 'Subprocess', data: { color: 'border-double border-4' } },
   ];
 
   const entityRelation = [
-    { type: 'Rectangle', icon: Square, label: 'Entity', data: { width: 200, height: 60, color: 'bg-primary/5 font-bold' } },
-    { type: 'Circle', icon: Circle, label: 'Attribute', data: { width: 140, height: 80, color: 'border-dashed' } },
-    { type: 'Diamond', icon: Diamond, label: 'Relationship', data: { color: 'bg-muted' } },
+    { type: 'rectangle', icon: Square, label: 'Entity', data: { width: 200, height: 60, color: 'bg-primary/5 font-bold' } },
+    { type: 'circle', icon: Circle, label: 'Attribute', data: { width: 140, height: 80, color: 'border-dashed' } },
+    { type: 'diamond', icon: Diamond, label: 'Relationship', data: { color: 'bg-muted' } },
   ];
 
   const infrastructure = [
-    { type: 'Infrastructure', label: 'AWS', icon: Cloud, iconName: 'Cloud', data: { color: 'bg-orange-500/10 text-orange-600 border-orange-500/50', sublabel: 'Cloud Service' } },
-    { type: 'Infrastructure', label: 'Kubernetes', icon: Box, iconName: 'Box', data: { color: 'bg-blue-500/10 text-blue-600 border-blue-500/50', sublabel: 'Cluster' } },
-    { type: 'Infrastructure', label: 'Docker', icon: Container, iconName: 'Container', data: { color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/50', sublabel: 'Container' } },
-    { type: 'Infrastructure', label: 'Server', icon: Server, iconName: 'Server', data: { color: 'bg-slate-500/10 text-slate-600 border-slate-500/50', sublabel: 'Compute' } },
-    { type: 'Infrastructure', label: 'Load Balancer', icon: Network, iconName: 'Network', data: { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/50', sublabel: 'Network' } },
-    { type: 'Infrastructure', label: 'Firewall', icon: Shield, iconName: 'Shield', data: { color: 'bg-red-500/10 text-red-600 border-red-500/50', sublabel: 'Security' } },
-    { type: 'Infrastructure', label: 'API Gateway', icon: Zap, iconName: 'Zap', data: { color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/50', sublabel: 'API' } },
-    { type: 'Infrastructure', label: 'Database', icon: Database, iconName: 'DatabaseIcon', data: { color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/50', sublabel: 'Storage' } },
+    { type: 'infrastructure', label: 'AWS', icon: Cloud, iconName: 'Cloud', data: { color: 'bg-orange-500/10 text-orange-600 border-orange-500/50', sublabel: 'Cloud Service' } },
+    { type: 'infrastructure', label: 'Kubernetes', icon: Box, iconName: 'Box', data: { color: 'bg-blue-500/10 text-blue-600 border-blue-500/50', sublabel: 'Cluster' } },
+    { type: 'infrastructure', label: 'Docker', icon: Container, iconName: 'Container', data: { color: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/50', sublabel: 'Container' } },
+    { type: 'infrastructure', label: 'Server', icon: Server, iconName: 'Server', data: { color: 'bg-slate-500/10 text-slate-600 border-slate-500/50', sublabel: 'Compute' } },
+    { type: 'infrastructure', label: 'Load Balancer', icon: Network, iconName: 'Network', data: { color: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/50', sublabel: 'Network' } },
+    { type: 'infrastructure', label: 'Firewall', icon: Shield, iconName: 'Shield', data: { color: 'bg-red-500/10 text-red-600 border-red-500/50', sublabel: 'Security' } },
+    { type: 'infrastructure', label: 'API Gateway', icon: Zap, iconName: 'Zap', data: { color: 'bg-yellow-500/10 text-yellow-600 border-yellow-500/50', sublabel: 'API' } },
+    { type: 'infrastructure', label: 'Database', icon: Database, iconName: 'DatabaseIcon', data: { color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/50', sublabel: 'Storage' } },
   ];
 
   const devices = [
-    { type: 'Client', icon: User, label: 'User' },
-    { type: 'Mobile', icon: Smartphone, label: 'Mobile App' },
-    { type: 'Browser', icon: Monitor, label: 'Web App' },
+    { type: 'client', icon: User, label: 'User' },
+    { type: 'mobile', icon: Smartphone, label: 'Mobile App' },
+    { type: 'browser', icon: Monitor, label: 'Web App' },
   ];
 
   const wireframes = [
-    { type: 'StickyNote', icon: StickyNote, label: 'Sticky Note' },
+    { type: 'stickynote', icon: StickyNote, label: 'Sticky Note' },
+    { type: 'browser', icon: Monitor, label: 'Browser Window' },
+    { type: 'rectangle', icon: Play, label: 'Button UI', data: { width: 120, height: 40, color: 'bg-primary text-primary-foreground border-primary rounded-md font-semibold text-center flex items-center justify-center text-xs' } },
+    { type: 'rectangle', icon: FormInput, label: 'Input UI', data: { width: 180, height: 40, color: 'bg-background border-input text-muted-foreground rounded-md text-left px-3 text-xs flex items-center' } },
+    { type: 'rectangle', icon: CreditCard, label: 'Card UI', data: { width: 220, height: 160, color: 'bg-card border shadow-sm rounded-lg flex items-center justify-center' } },
   ];
 
   const filteredIcons = ICON_LIST.filter(i => i.name.toLowerCase().includes(iconSearch.toLowerCase()));
@@ -333,11 +349,11 @@ export function FloatingToolbar({ onAddNode, className }: FloatingToolbarProps) 
               <div className="grid grid-cols-2 gap-2 p-3 pt-0 bg-muted/10">
                 {wireframes.map((wf) => (
                   <Button
-                    key={wf.type}
+                    key={wf.label}
                     variant="outline"
                     className="flex items-center justify-start h-12 gap-3 px-3 bg-background hover:bg-primary/5 hover:border-primary/50 transition-all shadow-sm"
                     onClick={() => {
-                      onAddNode(wf.type);
+                      onAddNode(wf.type, wf.data);
                       setActiveTool(wf.type);
                     }}
                   >

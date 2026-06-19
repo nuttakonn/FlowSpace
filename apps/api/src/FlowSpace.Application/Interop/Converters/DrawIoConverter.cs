@@ -54,7 +54,7 @@ public static class DrawIoConverter
                 new XElement("diagram",
                     new XAttribute("id", board.Id.ToString()),
                     new XAttribute("name", board.Name),
-                    Convert.ToBase64String(Encoding.UTF8.GetBytes(root.ToString()))
+                    root
                 )
             )
         );
@@ -72,11 +72,21 @@ public static class DrawIoConverter
         if (diagram == null) throw new InvalidOperationException("Invalid draw.io file: missing diagram node.");
 
         var boardName = diagram.Attribute("name")?.Value ?? "Imported draw.io Board";
-        var decodedContent = Encoding.UTF8.GetString(Convert.FromBase64String(diagram.Value));
         
-        using var innerReader = new StringReader(decodedContent);
-        using var innerXmlReader = XmlReader.Create(innerReader, SecureXmlSettings);
-        var model = XDocument.Load(innerXmlReader);
+        XDocument model;
+        if (diagram.HasElements)
+        {
+            var mxGraphModel = diagram.Element("mxGraphModel");
+            if (mxGraphModel == null) throw new InvalidOperationException("Invalid draw.io file: missing mxGraphModel inside diagram.");
+            model = new XDocument(mxGraphModel);
+        }
+        else
+        {
+            var decodedContent = Encoding.UTF8.GetString(Convert.FromBase64String(diagram.Value));
+            using var innerReader = new StringReader(decodedContent);
+            using var innerXmlReader = XmlReader.Create(innerReader, SecureXmlSettings);
+            model = XDocument.Load(innerXmlReader);
+        }
 
         var cells = model.Descendants("mxCell").ToList();
         var nodeMap = new Dictionary<string, Guid>();

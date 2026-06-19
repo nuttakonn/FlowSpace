@@ -20,7 +20,11 @@ public class ImportBoardCommandHandler : ICommandHandler<ImportBoardCommand, Boa
     private readonly IEdgeRepository _edgeRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    private static readonly string[] AllowedNodeTypes = { "Rectangle", "Circle", "Diamond", "Text", "StickyNote" };
+    private static readonly string[] AllowedNodeTypes = { 
+        "Rectangle", "Circle", "Diamond", "Text", "StickyNote", 
+        "Infrastructure", "Client", "Mobile", "Browser", "Icon", 
+        "Database", "Cloud", "Parallelogram", "Triangle", "Hexagon" 
+    };
 
     public ImportBoardCommandHandler(
         IWorkspaceRepository workspaceRepository,

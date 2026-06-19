@@ -27,5 +27,50 @@ VALUES
     '{}', 
     true, 
     NOW()
+),
+(
+    '018f4a1a-4a1a-7000-8000-000000000004', 
+    'UML Class Diagram', 
+    'Model software classes, attributes, and relationships.', 
+    'Flowchart', 
+    '{}', 
+    true, 
+    NOW()
+),
+(
+    '018f4a1a-4a1a-7000-8000-000000000005', 
+    'Kanban Board', 
+    'Track task status and project progress visually.', 
+    'Whiteboard', 
+    '{}', 
+    true, 
+    NOW()
+),
+(
+    '018f4a1a-4a1a-7000-8000-000000000006', 
+    'User Journey Map', 
+    'Map user steps, touchpoints, and emotions.', 
+    'Whiteboard', 
+    '{}', 
+    true, 
+    NOW()
+),
+(
+    '018f4a1a-4a1a-7000-8000-000000000007', 
+    'Concept Mindmap', 
+    'Structure thoughts and brainstorm central concepts.', 
+    'Mindmap', 
+    '{}', 
+    true, 
+    NOW()
+),
+(
+    '018f4a1a-4a1a-7000-8000-000000000008', 
+    'Project Timeline', 
+    'Sequence deliverables and milestones left-to-right.', 
+    'Flowchart', 
+    '{}', 
+    true, 
+    NOW()
 )
 ON CONFLICT (id) DO NOTHING;

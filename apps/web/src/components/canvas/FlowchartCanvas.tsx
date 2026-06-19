@@ -22,7 +22,7 @@ import { RemoteCursors } from "./RemoteCursors";
 import { RemoteSelectionHighlights } from "./RemoteSelectionHighlights";
 import { VersionHistory } from "./VersionHistory";
 import { FloatingToolbar } from "./FloatingToolbar";
-import { RectangleNode, DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode, TextNode, InfrastructureNode, ClientNode, MobileNode } from "./nodes/CustomNodes";
+import { RectangleNode, DiamondNode, CircleNode, DatabaseNode, CloudNode, BrowserNode, StickyNoteNode, IconNode, TextNode, InfrastructureNode, ClientNode, MobileNode, ParallelogramNode, TriangleNode, HexagonNode } from "./nodes/CustomNodes";
 
 const nodeTypes = {
   rectangle: RectangleNode,
@@ -36,7 +36,10 @@ const nodeTypes = {
   text: TextNode,
   infrastructure: InfrastructureNode,
   client: ClientNode,
-  mobile: MobileNode
+  mobile: MobileNode,
+  parallelogram: ParallelogramNode,
+  triangle: TriangleNode,
+  hexagon: HexagonNode
 };
 
 interface FlowchartCanvasProps {

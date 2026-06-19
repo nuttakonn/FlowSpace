@@ -330,6 +330,75 @@ export const IconNode = memo(({ id, data, selected }: NodeProps) => {
   );
 });
 
+export const ParallelogramNode = memo(({ id, data, selected }: NodeProps) => {
+  const nodeData = data as CustomNodeData;
+  const style = { 
+    width: nodeData.width || 180, 
+    height: nodeData.height || 100 
+  };
+  return (
+    <div style={style} className={cn(`group relative flex items-center justify-center transition-all`, selected && 'ring-2 ring-primary ring-offset-2')}>
+      <NodeResizer minWidth={80} minHeight={40} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
+      <SelectionToolbar isVisible={selected} nodeId={id} />
+      <div 
+        className={cn("w-full h-full bg-background border-2 border-primary flex items-center justify-center", nodeData.color)}
+        style={{ clipPath: 'polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%)' }}
+      >
+        <div className="text-center px-8 w-full flex items-center justify-center">
+          <NodeLabelInput id={id} label={nodeData.label} />
+        </div>
+      </div>
+      <SharedHandles />
+    </div>
+  );
+});
+
+export const TriangleNode = memo(({ id, data, selected }: NodeProps) => {
+  const nodeData = data as CustomNodeData;
+  const style = { 
+    width: nodeData.width || 140, 
+    height: nodeData.height || 120 
+  };
+  return (
+    <div style={style} className={cn(`group relative flex items-center justify-center transition-all`, selected && 'ring-2 ring-primary ring-offset-2')}>
+      <NodeResizer minWidth={80} minHeight={80} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
+      <SelectionToolbar isVisible={selected} nodeId={id} />
+      <div 
+        className={cn("w-full h-full bg-background border-2 border-primary flex items-center justify-center", nodeData.color)}
+        style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }}
+      >
+        <div className="text-center pt-8 pb-2 px-6 w-full flex items-center justify-center">
+          <NodeLabelInput id={id} label={nodeData.label} />
+        </div>
+      </div>
+      <SharedHandles />
+    </div>
+  );
+});
+
+export const HexagonNode = memo(({ id, data, selected }: NodeProps) => {
+  const nodeData = data as CustomNodeData;
+  const style = { 
+    width: nodeData.width || 160, 
+    height: nodeData.height || 120 
+  };
+  return (
+    <div style={style} className={cn(`group relative flex items-center justify-center transition-all`, selected && 'ring-2 ring-primary ring-offset-2')}>
+      <NodeResizer minWidth={80} minHeight={60} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
+      <SelectionToolbar isVisible={selected} nodeId={id} />
+      <div 
+        className={cn("w-full h-full bg-background border-2 border-primary flex items-center justify-center", nodeData.color)}
+        style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)' }}
+      >
+        <div className="text-center px-6 w-full flex items-center justify-center">
+          <NodeLabelInput id={id} label={nodeData.label} />
+        </div>
+      </div>
+      <SharedHandles />
+    </div>
+  );
+});
+
 RectangleNode.displayName = 'RectangleNode';
 DiamondNode.displayName = 'DiamondNode';
 CircleNode.displayName = 'CircleNode';
@@ -342,3 +411,6 @@ TextNode.displayName = 'TextNode';
 InfrastructureNode.displayName = 'InfrastructureNode';
 ClientNode.displayName = 'ClientNode';
 MobileNode.displayName = 'MobileNode';
+ParallelogramNode.displayName = 'ParallelogramNode';
+TriangleNode.displayName = 'TriangleNode';
+HexagonNode.displayName = 'HexagonNode';
