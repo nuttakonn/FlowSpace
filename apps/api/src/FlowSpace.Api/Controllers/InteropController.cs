@@ -24,7 +24,14 @@ public class InteropController : ApiController
     [Authorize(Policy = Permissions.NodeRead)]
     public async Task<IActionResult> Export(Guid boardId, [FromQuery] string format)
     {
-        var command = new ExportBoardCommand(boardId, format);
+        string authHeader = Request.Headers["Authorization"].ToString();
+        string token = "";
+        if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            token = authHeader.Substring("Bearer ".Length).Trim();
+        }
+
+        var command = new ExportBoardCommand(boardId, format, token);
         var result = await _sender.Send(command);
 
         if (result.IsFailure) return HandleFailure(result);

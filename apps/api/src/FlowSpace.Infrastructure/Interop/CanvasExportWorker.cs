@@ -40,10 +40,10 @@ public class CanvasExportWorker : BackgroundService
                 switch (job.Format.ToLower())
                 {
                     case "png":
-                        data = await exportService.ExportToPngAsync(job.BoardId, stoppingToken);
+                        data = await exportService.ExportToPngAsync(job.BoardId, cancellationToken: stoppingToken);
                         break;
                     case "pdf":
-                        data = await exportService.ExportToPdfAsync(job.BoardId, stoppingToken);
+                        data = await exportService.ExportToPdfAsync(job.BoardId, cancellationToken: stoppingToken);
                         break;
                     default:
                         _logger.LogWarning("Unsupported format {Format} in background job.", job.Format);

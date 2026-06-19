@@ -13,12 +13,32 @@ public class PlaywrightExportService : IExportService
         _baseUrl = configuration["FrontendUrl"] ?? "http://localhost:3000";
     }
 
-    public async Task<byte[]> ExportToPngAsync(Guid boardId, CancellationToken cancellationToken = default)
+    private async Task SetupAuthenticationAsync(IPage page, string jwtToken)
+    {
+        if (!string.IsNullOrEmpty(jwtToken))
+        {
+            await page.AddInitScriptAsync(@$"
+                localStorage.setItem('flowspace-auth-storage', JSON.stringify({{
+                    state: {{
+                        user: {{ id: 'system', displayName: 'System', email: 'system@flowspace.internal' }},
+                        accessToken: '{jwtToken}',
+                        refreshToken: null,
+                        isAuthenticated: true
+                    }},
+                    version: 0
+                }}));
+            ");
+        }
+    }
+
+    public async Task<byte[]> ExportToPngAsync(Guid boardId, string jwtToken = "", CancellationToken cancellationToken = default)
     {
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
         
         var page = await browser.NewPageAsync();
+        await SetupAuthenticationAsync(page, jwtToken);
+        
         // Route must render the canvas without UI bars
         await page.GotoAsync($"{_baseUrl}/boards/{boardId}?export=true", new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
@@ -28,24 +48,42 @@ public class PlaywrightExportService : IExportService
         return await page.ScreenshotAsync(new PageScreenshotOptions { FullPage = true, Type = ScreenshotType.Png });
     }
 
-    public async Task<byte[]> ExportToPdfAsync(Guid boardId, CancellationToken cancellationToken = default)
+    public async Task<byte[]> ExportToJpgAsync(Guid boardId, string jwtToken = "", CancellationToken cancellationToken = default)
     {
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
         
         var page = await browser.NewPageAsync();
+        await SetupAuthenticationAsync(page, jwtToken);
+        
+        await page.GotoAsync($"{_baseUrl}/boards/{boardId}?export=true", new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
+        await page.WaitForSelectorAsync(".react-flow__renderer");
+
+        return await page.ScreenshotAsync(new PageScreenshotOptions { FullPage = true, Type = ScreenshotType.Jpeg });
+    }
+
+    public async Task<byte[]> ExportToPdfAsync(Guid boardId, string jwtToken = "", CancellationToken cancellationToken = default)
+    {
+        using var playwright = await Playwright.CreateAsync();
+        await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+        
+        var page = await browser.NewPageAsync();
+        await SetupAuthenticationAsync(page, jwtToken);
+        
         await page.GotoAsync($"{_baseUrl}/boards/{boardId}?export=true", new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
         await page.WaitForSelectorAsync(".react-flow__renderer");
 
         return await page.PdfAsync(new PagePdfOptions { PrintBackground = true });
     }
 
-    public async Task<string> ExportToSvgAsync(Guid boardId, CancellationToken cancellationToken = default)
+    public async Task<string> ExportToSvgAsync(Guid boardId, string jwtToken = "", CancellationToken cancellationToken = default)
     {
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
         
         var page = await browser.NewPageAsync();
+        await SetupAuthenticationAsync(page, jwtToken);
+        
         await page.GotoAsync($"{_baseUrl}/boards/{boardId}?export=true", new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
         await page.WaitForSelectorAsync(".react-flow__renderer");
 

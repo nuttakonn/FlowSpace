@@ -33,7 +33,15 @@ apiClient.interceptors.request.use(
     // Add share token to query params if it exists in the URL or store
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
-      const shareToken = urlParams.get('token');
+      let shareToken = urlParams.get('token');
+      
+      if (!shareToken) {
+        const match = window.location.pathname.match(/\/shared\/([^/]+)/);
+        if (match) {
+          shareToken = match[1];
+        }
+      }
+
       if (shareToken) {
         config.params = { ...config.params, token: shareToken };
       }

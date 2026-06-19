@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 export interface UseExportResult {
   isExporting: boolean;
   exportProgress: number;
-  exportAs: (format: 'png' | 'pdf' | 'svg') => Promise<void>;
+  exportAs: (format: 'png' | 'jpg' | 'pdf' | 'svg' | 'flowspace' | 'drawio') => Promise<void>;
 }
 
 export function useExport(boardId: string): UseExportResult {
@@ -33,27 +33,35 @@ export function useExport(boardId: string): UseExportResult {
     window.URL.revokeObjectURL(url);
   }, []);
 
-  const exportAs = useCallback(async (format: 'png' | 'pdf' | 'svg'): Promise<void> => {
+  const exportAs = useCallback(async (format: 'png' | 'jpg' | 'pdf' | 'svg' | 'flowspace' | 'drawio'): Promise<void> => {
     setIsExporting(true);
     setExportProgress(0);
-    toast.info('Exporting...');
+    const toastId = toast.loading(`Preparing export as ${format.toUpperCase()}...`);
 
     try {
-      const response = await apiClient.post(`/boards/${boardId}/export`, { format }, { responseType: 'blob' });
+      const response = await apiClient.get(`/interop/boards/${boardId}/export`, {
+        params: { format },
+        responseType: 'blob'
+      });
       
       const contentType = String(response.headers['content-type'] || '');
       
       if (contentType.includes('application/json')) {
-        // Response is JSON blob containing jobId, read it as text
+        // Response is JSON blob, check if it contains jobId or direct file payload
         const text = await response.data.text();
-        const data = JSON.parse(text) as { jobId?: string };
+        let data: any;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          data = {};
+        }
         
         if (data.jobId) {
           const jobId = data.jobId;
           
           const poll = async (): Promise<void> => {
             try {
-              const pollResponse = await apiClient.get(`/boards/${boardId}/export/${jobId}`, {
+              const pollResponse = await apiClient.get(`/interop/boards/${boardId}/export/${jobId}`, {
                 responseType: 'blob',
               });
               
@@ -77,7 +85,7 @@ export function useExport(boardId: string): UseExportResult {
                     const downloadRes = await axios.get(jobStatus.downloadUrl, { responseType: 'blob' });
                     triggerDownload(downloadRes.data, format, downloadRes.headers as Record<string, string>);
                     setExportProgress(100);
-                    toast.success('Export complete!');
+                    toast.success('Export complete!', { id: toastId });
                     setIsExporting(false);
                     return;
                   }
@@ -92,7 +100,7 @@ export function useExport(boardId: string): UseExportResult {
                 // Done polling, got file blob directly
                 triggerDownload(pollResponse.data, format, pollResponse.headers as Record<string, string>);
                 setExportProgress(100);
-                toast.success('Export complete!');
+                toast.success('Export complete!', { id: toastId });
                 setIsExporting(false);
               }
             } catch (pollErr) {
@@ -103,30 +111,40 @@ export function useExport(boardId: string): UseExportResult {
               } else if (pollErr instanceof Error) {
                 errMsg = pollErr.message;
               }
-              toast.error(errMsg);
+              toast.error(errMsg, { id: toastId });
             }
           };
           
           setTimeout(poll, 2000);
         } else {
-          throw new Error('Invalid export response format');
+          // If no jobId, it is direct serialized board content (like .flowspace)
+          triggerDownload(response.data, format, response.headers as Record<string, string>);
+          setExportProgress(100);
+          toast.success('Export complete!', { id: toastId });
+          setIsExporting(false);
         }
       } else {
-        // Immediate download
+        // Immediate download of the file blob (PNG, JPG, PDF, SVG)
         triggerDownload(response.data, format, response.headers as Record<string, string>);
         setExportProgress(100);
-        toast.success('Export complete!');
+        toast.success('Export complete!', { id: toastId });
         setIsExporting(false);
       }
     } catch (err) {
       setIsExporting(false);
       let errMsg = 'Export failed';
       if (axios.isAxiosError(err)) {
-        errMsg = err.response?.data?.detail || err.message || errMsg;
+        try {
+          const text = await err.response?.data?.text();
+          const detail = JSON.parse(text || '{}').detail;
+          errMsg = detail || err.message || errMsg;
+        } catch {
+          errMsg = err.message || errMsg;
+        }
       } else if (err instanceof Error) {
         errMsg = err.message;
       }
-      toast.error(errMsg);
+      toast.error(errMsg, { id: toastId });
     }
   }, [boardId, triggerDownload]);
 

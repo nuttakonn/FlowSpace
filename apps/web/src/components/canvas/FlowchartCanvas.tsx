@@ -60,6 +60,7 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
   const wrapperRef = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const isExportMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('export') === 'true';
   
   const nodes = useCanvasStore(s => s.nodes);
   const edges = useCanvasStore(s => s.edges);
@@ -194,80 +195,86 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
       >
-        <Controls />
-        <MiniMap />
+        {!isExportMode && <Controls />}
+        {!isExportMode && <MiniMap />}
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
         
         <RemoteSelectionHighlights />
         <RemoteCursors />
 
-        <Panel position="top-left" className="ml-4 mt-20 flex gap-2 items-start pointer-events-auto">
-          {isSidebarOpen ? (
-            <div className="flex gap-2 items-start">
-              <FloatingToolbar onAddNode={handleAddNode} />
+        {!isExportMode && (
+          <Panel position="top-left" className="ml-4 mt-20 flex gap-2 items-start pointer-events-auto">
+            {isSidebarOpen ? (
+              <div className="flex gap-2 items-start">
+                <FloatingToolbar onAddNode={handleAddNode} />
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-10 w-10 bg-background border shadow-md rounded-lg hover:bg-muted"
+                  onClick={() => setIsSidebarOpen(false)}
+                  title="Collapse Shapes Panel"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+              </div>
+            ) : (
               <Button 
                 variant="outline" 
                 size="icon" 
                 className="h-10 w-10 bg-background border shadow-md rounded-lg hover:bg-muted"
-                onClick={() => setIsSidebarOpen(false)}
-                title="Collapse Shapes Panel"
+                onClick={() => setIsSidebarOpen(true)}
+                title="Expand Shapes Panel"
               >
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronRight className="h-5 w-5" />
               </Button>
-            </div>
-          ) : (
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="h-10 w-10 bg-background border shadow-md rounded-lg hover:bg-muted"
-              onClick={() => setIsSidebarOpen(true)}
-              title="Expand Shapes Panel"
-            >
-              <ChevronRight className="h-5 w-5" />
+            )}
+          </Panel>
+        )}
+
+        {!isExportMode && (
+          <Panel position="top-center" className="mt-4 bg-background/80 backdrop-blur p-1 rounded-lg border shadow-sm flex gap-1 items-center">
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={undo} disabled={past.length === 0}>
+              <Undo className="w-4 h-4" />
             </Button>
-          )}
-        </Panel>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={redo} disabled={future.length === 0}>
+              <Redo className="w-4 h-4" />
+            </Button>
+            <div className="w-px h-4 bg-border mx-1" />
+            <VersionHistory />
+            <div className="w-px h-4 bg-border mx-1" />
+            <div className="text-[10px] text-muted-foreground px-2 flex items-center gap-1 min-w-[70px]">
+              {syncStatus === 'saving' && <><Loader2 className="w-3 h-3 text-blue-500 animate-spin" /> Saving</>}
+              {syncStatus === 'saved' && <><CloudUpload className="w-3 h-3 text-green-500" /> Saved</>}
+              {syncStatus === 'failed' && <><CloudOff className="w-3 h-3 text-destructive" /> Offline</>}
+              {syncStatus === 'idle' && <><CloudUpload className="w-3 h-3 text-muted-foreground" /> Synced</>}
+            </div>
+          </Panel>
+        )}
 
-        <Panel position="top-center" className="mt-4 bg-background/80 backdrop-blur p-1 rounded-lg border shadow-sm flex gap-1 items-center">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={undo} disabled={past.length === 0}>
-            <Undo className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={redo} disabled={future.length === 0}>
-            <Redo className="w-4 h-4" />
-          </Button>
-          <div className="w-px h-4 bg-border mx-1" />
-          <VersionHistory />
-          <div className="w-px h-4 bg-border mx-1" />
-          <div className="text-[10px] text-muted-foreground px-2 flex items-center gap-1 min-w-[70px]">
-            {syncStatus === 'saving' && <><Loader2 className="w-3 h-3 text-blue-500 animate-spin" /> Saving</>}
-            {syncStatus === 'saved' && <><CloudUpload className="w-3 h-3 text-green-500" /> Saved</>}
-            {syncStatus === 'failed' && <><CloudOff className="w-3 h-3 text-destructive" /> Offline</>}
-            {syncStatus === 'idle' && <><CloudUpload className="w-3 h-3 text-muted-foreground" /> Synced</>}
-          </div>
-        </Panel>
-
-        <Panel position="top-right" className="mt-4 mr-4 flex -space-x-2">
-            {Object.values(remoteUsers).slice(0, 5).map((user, i) => (
-              <div
-                key={i}
-                className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white shadow-sm"
-                style={{ backgroundColor: user?.color || '#ccc' }}
-                title={user?.name || 'Guest'}
-              >
-                {(user?.name || 'Guest').charAt(0).toUpperCase()}
-              </div>
-            ))}
-            {Object.values(remoteUsers).length > 5 && (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground shadow-sm">
-                +{Object.values(remoteUsers).length - 5}
-              </div>
-            )}
-            {Object.values(remoteUsers).length === 0 && (
-              <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed text-muted-foreground bg-background/50">
-                <UserCircle2 className="h-4 w-4" />
-              </div>
-            )}
-        </Panel>
+        {!isExportMode && (
+          <Panel position="top-right" className="mt-4 mr-4 flex -space-x-2">
+              {Object.values(remoteUsers).slice(0, 5).map((user, i) => (
+                <div
+                  key={i}
+                  className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background text-[10px] font-bold text-white shadow-sm"
+                  style={{ backgroundColor: user?.color || '#ccc' }}
+                  title={user?.name || 'Guest'}
+                >
+                  {(user?.name || 'Guest').charAt(0).toUpperCase()}
+                </div>
+              ))}
+              {Object.values(remoteUsers).length > 5 && (
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground shadow-sm">
+                  +{Object.values(remoteUsers).length - 5}
+                </div>
+              )}
+              {Object.values(remoteUsers).length === 0 && (
+                <div className="flex h-8 w-8 items-center justify-center rounded-full border border-dashed text-muted-foreground bg-background/50">
+                  <UserCircle2 className="h-4 w-4" />
+                </div>
+              )}
+          </Panel>
+        )}
       </ReactFlow>
     </div>
   );

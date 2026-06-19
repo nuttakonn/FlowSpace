@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Settings, ArrowLeft } from "lucide-react";
+import { Settings, ArrowLeft, Download, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 import { apiClient } from "@/lib/api";
@@ -13,6 +13,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FlowchartCanvas } from "@/components/canvas/FlowchartCanvas";
 import { ShareDialog } from "@/components/canvas/ShareDialog";
 import { AiSidePanel } from "@/components/canvas/AiSidePanel";
+import { useExport } from "@/hooks/useExport";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator
+} from "@/components/ui/dropdown-menu";
 
 interface Board {
   id: string;
@@ -30,6 +39,8 @@ export default function BoardEditorPage() {
   const [board, setBoard] = useState<Board | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const { isExporting, exportAs } = useExport(boardId);
 
   useEffect(() => {
     const fetchBoard = async () => {
@@ -81,29 +92,75 @@ export default function BoardEditorPage() {
   }
 
   const shareToken = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('token') || undefined : undefined;
+  const isExportMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('export') === 'true';
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
-      <header className="flex h-14 shrink-0 items-center justify-between border-b px-4 bg-background z-10">
-        <div className="flex items-center gap-4">
-          <Link href={`/workspaces/${board.workspaceId}`}>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <div className="flex flex-col">
-            <h1 className="text-sm font-semibold">{board.name}</h1>
-            <span className="text-xs text-muted-foreground capitalize">{board.type}</span>
+      {!isExportMode && (
+        <header className="flex h-14 shrink-0 items-center justify-between border-b px-4 bg-background z-10">
+          <div className="flex items-center gap-4">
+            <Link href={`/workspaces/${board.workspaceId}`}>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            </Link>
+            <div className="flex flex-col">
+              <h1 className="text-sm font-semibold">{board.name}</h1>
+              <span className="text-xs text-muted-foreground capitalize">{board.type}</span>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <AiSidePanel />
-          <ShareDialog boardId={board.id} />
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Settings className="h-4 w-4" />
-          </Button>
-        </div>
-      </header>
+          <div className="flex items-center gap-2">
+            <AiSidePanel />
+            <ShareDialog boardId={board.id} />
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2" disabled={isExporting}>
+                  {isExporting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      Exporting...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-4 w-4" />
+                      Export
+                    </>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Export Formats</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => exportAs('png')}>
+                  Export as .png
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAs('jpg')}>
+                  Export as .jpg
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAs('pdf')}>
+                  Export as .pdf
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAs('svg')}>
+                  Export as .svg
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel>Native & Interop</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => exportAs('flowspace')}>
+                  Export as .flowspace
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAs('drawio')}>
+                  Export as Draw.io (.drawio)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Settings className="h-4 w-4" />
+            </Button>
+          </div>
+        </header>
+      )}
 
       <main className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0">

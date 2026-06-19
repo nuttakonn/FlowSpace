@@ -209,9 +209,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         set((s) => ({ remoteUsers: { ...s.remoteUsers, [state.clientId]: state.userState } }));
       });
       
-      localYNodes.observe(() => { 
+      localYNodes.observe((event) => { 
         const currentNodes = get().nodes;
-        const updatedNodes = Array.from(localYNodes.values()).map(n => {
+        const deletedKeys = new Set<string>();
+        event.keys.forEach((change, key) => {
+          if (change.action === 'delete') {
+            deletedKeys.add(key);
+          }
+        });
+
+        const yNodeValues = Array.from(localYNodes.values()).map(n => {
           const node = n as Node;
           const localNode = currentNodes.find(cn => cn.id === node.id);
           return {
@@ -219,12 +226,28 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
             selected: localNode ? localNode.selected : false
           };
         });
-        set({ nodes: updatedNodes }); 
+
+        const yNodeIds = new Set(yNodeValues.map(n => n.id));
+
+        const remainingFetchedNodes = currentNodes.filter(n => {
+          if (yNodeIds.has(n.id)) return false;
+          if (deletedKeys.has(n.id)) return false;
+          return true;
+        });
+
+        set({ nodes: [...yNodeValues, ...remainingFetchedNodes] }); 
       });
       
-      localYEdges.observe(() => { 
+      localYEdges.observe((event) => { 
         const currentEdges = get().edges;
-        const updatedEdges = Array.from(localYEdges.values()).map(e => {
+        const deletedKeys = new Set<string>();
+        event.keys.forEach((change, key) => {
+          if (change.action === 'delete') {
+            deletedKeys.add(key);
+          }
+        });
+
+        const yEdgeValues = Array.from(localYEdges.values()).map(e => {
           const edge = e as Edge;
           const localEdge = currentEdges.find(ce => ce.id === edge.id);
           return {
@@ -232,7 +255,16 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
             selected: localEdge ? localEdge.selected : false
           };
         });
-        set({ edges: updatedEdges }); 
+
+        const yEdgeIds = new Set(yEdgeValues.map(e => e.id));
+
+        const remainingFetchedEdges = currentEdges.filter(e => {
+          if (yEdgeIds.has(e.id)) return false;
+          if (deletedKeys.has(e.id)) return false;
+          return true;
+        });
+
+        set({ edges: [...yEdgeValues, ...remainingFetchedEdges] }); 
       });
 
       connection.start().then(() => {
