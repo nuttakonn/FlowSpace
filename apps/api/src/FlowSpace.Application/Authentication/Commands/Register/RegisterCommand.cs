@@ -10,7 +10,7 @@ using System.Text;
 
 namespace FlowSpace.Application.Authentication.Commands.Register;
 
-public record RegisterCommand(string Email, string Password, string DisplayName, string InviteCode) : ICommand<AuthenticationResponse>;
+public record RegisterCommand(string Email, string Password, string DisplayName, string? InviteCode = null) : ICommand<AuthenticationResponse>;
 
 public class RegisterCommandHandler : ICommandHandler<RegisterCommand, AuthenticationResponse>
 {
@@ -36,7 +36,10 @@ public class RegisterCommandHandler : ICommandHandler<RegisterCommand, Authentic
 
     public async Task<Result<AuthenticationResponse>> Handle(RegisterCommand command, CancellationToken cancellationToken)
     {
-        if (!_inviteCodeService.IsValid(command.InviteCode))
+        // Guest shadow accounts bypass invite code validation
+        bool isGuestEmail = command.Email.StartsWith("guest-") && command.Email.EndsWith("@flowspace.local");
+
+        if (!isGuestEmail && (string.IsNullOrEmpty(command.InviteCode) || !_inviteCodeService.IsValid(command.InviteCode)))
         {
             return Result.Failure<AuthenticationResponse>(new Error("Auth.InvalidInviteCode", "Invalid invite code."));
         }

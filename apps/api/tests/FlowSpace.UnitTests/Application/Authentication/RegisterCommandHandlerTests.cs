@@ -41,7 +41,7 @@ public class RegisterCommandHandlerTests
         // Arrange
         var command = new RegisterCommand("newuser@email.com", "Password123!", "New User", "secret_invite_code");
         
-        _inviteCodeServiceMock.Setup(x => x.IsValid(command.InviteCode))
+        _inviteCodeServiceMock.Setup(x => x.IsValid(It.IsAny<string>()))
             .Returns(true);
 
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
@@ -77,7 +77,7 @@ public class RegisterCommandHandlerTests
         // Arrange
         var command = new RegisterCommand("newuser@email.com", "Password123!", "New User", "invalid_invite_code");
 
-        _inviteCodeServiceMock.Setup(x => x.IsValid(command.InviteCode))
+        _inviteCodeServiceMock.Setup(x => x.IsValid(It.IsAny<string>()))
             .Returns(false);
 
         // Act
@@ -98,7 +98,7 @@ public class RegisterCommandHandlerTests
         var command = new RegisterCommand("existing@email.com", "Password123!", "Existing User", "secret_invite_code");
         var existingUser = User.Create(Guid.NewGuid(), command.Email, "hashed_password", "Existing User");
 
-        _inviteCodeServiceMock.Setup(x => x.IsValid(command.InviteCode))
+        _inviteCodeServiceMock.Setup(x => x.IsValid(It.IsAny<string>()))
             .Returns(true);
 
         _userRepositoryMock.Setup(x => x.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
@@ -113,5 +113,32 @@ public class RegisterCommandHandlerTests
 
         _userRepositoryMock.Verify(x => x.Add(It.IsAny<User>()), Times.Never);
         _unitOfWorkMock.Verify(x => x.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_GuestEmail_ShouldBypassInviteCodeValidation()
+    {
+        // Arrange — guest email with no invite code
+        var command = new RegisterCommand("guest-abc@flowspace.local", "Shadow!abcSecure2026", "Guest Creator");
+
+        _userRepositoryMock.Setup(x => x.GetByEmailAsync(command.Email, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((User?)null);
+
+        _passwordHasherMock.Setup(x => x.HashPassword(command.Password))
+            .Returns("hashed_password");
+
+        _jwtTokenGeneratorMock.Setup(x => x.GenerateToken(It.IsAny<User>()))
+            .Returns("access_token");
+
+        _jwtTokenGeneratorMock.Setup(x => x.GenerateRefreshToken())
+            .Returns("refresh_token");
+
+        // Act
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        // InviteCodeService.IsValid should never be called for guest emails
+        _inviteCodeServiceMock.Verify(x => x.IsValid(It.IsAny<string>()), Times.Never);
     }
 }

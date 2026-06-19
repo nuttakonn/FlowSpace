@@ -84,22 +84,29 @@ public class AuthEndpointTests : IClassFixture<FlowSpaceWebFactory>
     }
 
     [Fact]
-    public async Task Register_ShouldReturn404_BecauseEndpointIsRemoved()
+    public async Task Register_GuestAccount_ShouldReturn200_WithoutInviteCode()
     {
         // Arrange
         var client = _factory.CreateClient();
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await dbContext.Database.EnsureDeletedAsync();
+            await dbContext.Database.EnsureCreatedAsync();
+        }
+
         var request = new
         {
-            Email = "newuser@email.com",
-            Password = "Password123!",
-            DisplayName = "New User",
-            InviteCode = "secret"
+            Email = "guest-inttest001@flowspace.local",
+            Password = "Shadow!inttest001Secure2026",
+            DisplayName = "Guest Creator"
         };
 
         // Act
         var response = await client.PostAsJsonAsync("/api/v1/auth/register", request);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 }

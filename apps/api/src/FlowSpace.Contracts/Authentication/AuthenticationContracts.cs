@@ -1,6 +1,6 @@
 namespace FlowSpace.Contracts.Authentication;
 
-public record RegisterRequest(string Email, string Password, string DisplayName, string InviteCode);
+public record RegisterRequest(string Email, string Password, string DisplayName, string? InviteCode = null);
 
 public record LoginRequest(string Email, string Password);
 

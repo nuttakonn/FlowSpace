@@ -9,6 +9,8 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
         RuleFor(x => x.Email).NotEmpty().EmailAddress();
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
         RuleFor(x => x.DisplayName).NotEmpty().MaximumLength(100);
-        RuleFor(x => x.InviteCode).NotEmpty().WithMessage("Invite code is required.");
+        RuleFor(x => x.InviteCode)
+            .NotEmpty().WithMessage("Invite code is required.")
+            .Unless(x => x.Email.StartsWith("guest-") && x.Email.EndsWith("@flowspace.local"));
     }
 }
