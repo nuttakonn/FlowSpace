@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Sparkles, FolderPlus, LogIn, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ export default function HomePage() {
   const { isAuthenticated } = useAuthStore();
   const [isMounted, setIsMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("create");
-  
+
   // Create Workspace Form State
   const [createName, setCreateName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -28,6 +28,12 @@ export default function HomePage() {
 
   // Auth Initialization State
   const [isInitializingAuth, setIsInitializingAuth] = useState(false);
+
+  // Ref so handlers can always read the latest isAuthenticated
+  const isAuthenticatedRef = useRef(isAuthenticated);
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+  }, [isAuthenticated]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -51,12 +57,13 @@ export default function HomePage() {
           });
 
           useAuthStore.getState().setAuth(
-            response.data.user,
+            { id: response.data.id, email: response.data.email, displayName: response.data.displayName },
             response.data.accessToken,
             response.data.refreshToken
           );
         } catch (error) {
           console.error("Failed to setup shadow account", error);
+          toast.error("Could not initialise session — is the API reachable?");
         } finally {
           setIsInitializingAuth(false);
         }
@@ -66,6 +73,22 @@ export default function HomePage() {
     }
   }, [isAuthenticated, isMounted]);
 
+  /** Poll until authenticated or timeout (ms). */
+  const waitForAuth = (timeoutMs = 8000): Promise<boolean> =>
+    new Promise((resolve) => {
+      if (isAuthenticatedRef.current) return resolve(true);
+      const start = Date.now();
+      const id = setInterval(() => {
+        if (isAuthenticatedRef.current) {
+          clearInterval(id);
+          resolve(true);
+        } else if (Date.now() - start >= timeoutMs) {
+          clearInterval(id);
+          resolve(false);
+        }
+      }, 150);
+    });
+
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!createName.trim()) return;
@@ -73,22 +96,22 @@ export default function HomePage() {
     setIsCreating(true);
 
     try {
-      // Ensure shadow account registration is completed
-      if (isInitializingAuth && !isAuthenticated) {
-        toast.info("Initializing session, please wait...");
-        // Wait briefly
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        if (isInitializingAuth && !isAuthenticated) {
-          throw new Error("Session initialization timeout. Please try again.");
+      if (!isAuthenticatedRef.current) {
+        toast.info("Initialising session…");
+        const ok = await waitForAuth();
+        if (!ok) {
+          setCreateError("Session not ready. Please wait a moment and try again.");
+          return;
         }
       }
 
       const res = await apiClient.post("/workspaces", { name: createName.trim() });
       toast.success("Workspace created successfully!");
       router.push(`/workspaces/${res.data.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create workspace", error);
-      const backendMessage = error.response?.data?.detail;
+      const axiosError = error as { response?: { data?: { detail?: string } } };
+      const backendMessage = axiosError.response?.data?.detail;
       if (backendMessage && backendMessage.includes("exists")) {
         setCreateError("This workspace name/ID is already taken.");
       } else {
@@ -107,28 +130,34 @@ export default function HomePage() {
     setIsEntering(true);
 
     try {
-      // Ensure shadow account registration is completed
-      if (isInitializingAuth && !isAuthenticated) {
-        toast.info("Initializing session, please wait...");
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        if (isInitializingAuth && !isAuthenticated) {
-          throw new Error("Session initialization timeout. Please try again.");
+      if (!isAuthenticatedRef.current) {
+        toast.info("Initialising session…");
+        const ok = await waitForAuth();
+        if (!ok) {
+          setEnterError("Session not ready. Please wait a moment and try again.");
+          return;
         }
       }
 
       const response = await apiClient.get(`/workspaces/lookup`, {
         params: { query: enterQuery.trim() }
       });
-      
+
       // Join the workspace as a member
       await apiClient.post(`/workspaces/${response.data.id}/join`);
-      
+
       toast.success(`Joined workspace: ${response.data.name}`);
       router.push(`/workspaces/${response.data.id}`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to look up workspace", error);
-      setEnterError("Workspace not found. Check the name or ID.");
-      toast.error("Workspace not found");
+      const axiosError = error as { response?: { status?: number; data?: { detail?: string } } };
+      if (axiosError.response?.status === 404) {
+        setEnterError("Workspace not found. Check the name or ID.");
+        toast.error("Workspace not found");
+      } else {
+        setEnterError("Could not enter workspace. Please try again.");
+        toast.error("Failed to enter workspace");
+      }
     } finally {
       setIsEntering(false);
     }
@@ -153,14 +182,14 @@ export default function HomePage() {
             FlowSpace
           </span>
         </div>
-        
+
         <p className="text-xs text-indigo-200/50 mb-8 font-medium tracking-wider uppercase">
           Collaborative Workspace Hub
         </p>
 
         {/* Main Glassmorphic Panel */}
         <div className="w-full rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl shadow-2xl p-6 md:p-8 flex flex-col gap-6 relative overflow-hidden">
-          
+
           {/* Tab Selector */}
           <div className="flex w-full bg-slate-950/80 p-1.5 rounded-2xl border border-white/[0.05]">
             <button
@@ -220,13 +249,18 @@ export default function HomePage() {
 
               <button
                 type="submit"
-                disabled={isCreating || !createName.trim()}
+                disabled={isCreating || !createName.trim() || isInitializingAuth}
                 className="w-full mt-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 active:from-indigo-700 active:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
               >
                 {isCreating ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Creating Workspace...
+                  </>
+                ) : isInitializingAuth ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Initialising Session...
                   </>
                 ) : (
                   <>
@@ -271,13 +305,18 @@ export default function HomePage() {
 
               <button
                 type="submit"
-                disabled={isEntering || !enterQuery.trim()}
+                disabled={isEntering || !enterQuery.trim() || isInitializingAuth}
                 className="w-full mt-2 py-3.5 px-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-500 hover:to-violet-500 active:from-indigo-700 active:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20"
               >
                 {isEntering ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Searching Workspace...
+                  </>
+                ) : isInitializingAuth ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Initialising Session...
                   </>
                 ) : (
                   <>
@@ -294,7 +333,7 @@ export default function HomePage() {
             <div className="absolute bottom-2 left-0 right-0 text-center select-none">
               <span className="text-[9px] text-indigo-400/50 flex items-center justify-center gap-1.5 font-bold uppercase tracking-wider">
                 <Loader2 className="h-3 w-3 animate-spin" />
-                Initializing secure guest credentials...
+                Initialising secure guest credentials...
               </span>
             </div>
           )}
