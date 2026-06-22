@@ -142,11 +142,11 @@ export const DiamondNode = memo(({ id, data, selected }: NodeProps) => {
     height: nodeData.height || 150 
   };
   return (
-    <div style={style} className={cn(`group relative flex items-center justify-center transition-all`, selected && 'ring-2 ring-primary ring-offset-2')}>
+    <div style={style} className="group relative flex items-center justify-center transition-all">
       <NodeResizer minWidth={100} minHeight={100} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div 
-        className={cn("w-full h-full bg-background border-2 border-primary rotate-45 flex items-center justify-center", nodeData.color)}
+        className={cn("w-full h-full bg-background rotate-45 flex items-center justify-center transition-all", nodeData.color, selected ? "border-[3px] border-primary shadow-[0_0_12px_rgba(59,130,246,0.35)]" : "border-2 border-primary")}
         style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
       >
         <div className="-rotate-45 text-center px-6 w-full flex items-center justify-center">
@@ -368,11 +368,11 @@ export const ParallelogramNode = memo(({ id, data, selected }: NodeProps) => {
     height: nodeData.height || 100 
   };
   return (
-    <div style={style} className={cn(`group relative flex items-center justify-center transition-all`, selected && 'ring-2 ring-primary ring-offset-2')}>
+    <div style={style} className="group relative flex items-center justify-center transition-all">
       <NodeResizer minWidth={80} minHeight={40} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div 
-        className={cn("w-full h-full bg-background border-2 border-primary flex items-center justify-center", nodeData.color)}
+        className={cn("w-full h-full bg-background flex items-center justify-center transition-all", nodeData.color, selected ? "border-[3px] border-primary shadow-[0_0_12px_rgba(59,130,246,0.35)]" : "border-2 border-primary")}
         style={{ clipPath: 'polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%)' }}
       >
         <div className="text-center px-8 w-full flex items-center justify-center">
@@ -391,11 +391,11 @@ export const TriangleNode = memo(({ id, data, selected }: NodeProps) => {
     height: nodeData.height || 120 
   };
   return (
-    <div style={style} className={cn(`group relative flex items-center justify-center transition-all`, selected && 'ring-2 ring-primary ring-offset-2')}>
+    <div style={style} className="group relative flex items-center justify-center transition-all">
       <NodeResizer minWidth={80} minHeight={80} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div 
-        className={cn("w-full h-full bg-background border-2 border-primary flex items-center justify-center", nodeData.color)}
+        className={cn("w-full h-full bg-background flex items-center justify-center transition-all", nodeData.color, selected ? "border-[3px] border-primary shadow-[0_0_12px_rgba(59,130,246,0.35)]" : "border-2 border-primary")}
         style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }}
       >
         <div className="text-center pt-8 pb-2 px-6 w-full flex items-center justify-center">
@@ -414,11 +414,11 @@ export const HexagonNode = memo(({ id, data, selected }: NodeProps) => {
     height: nodeData.height || 120 
   };
   return (
-    <div style={style} className={cn(`group relative flex items-center justify-center transition-all`, selected && 'ring-2 ring-primary ring-offset-2')}>
+    <div style={style} className="group relative flex items-center justify-center transition-all">
       <NodeResizer minWidth={80} minHeight={60} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
       <div 
-        className={cn("w-full h-full bg-background border-2 border-primary flex items-center justify-center", nodeData.color)}
+        className={cn("w-full h-full bg-background flex items-center justify-center transition-all", nodeData.color, selected ? "border-[3px] border-primary shadow-[0_0_12px_rgba(59,130,246,0.35)]" : "border-2 border-primary")}
         style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)' }}
       >
         <div className="text-center px-6 w-full flex items-center justify-center">
