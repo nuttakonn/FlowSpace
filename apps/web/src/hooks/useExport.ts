@@ -49,9 +49,12 @@ export function useExport(boardId: string): UseExportResult {
       if (contentType.includes('application/json')) {
         // Response is JSON blob, check if it contains jobId or direct file payload
         const text = await response.data.text();
-        let data: any;
+        interface ExportJobData {
+          jobId?: string;
+        }
+        let data: ExportJobData;
         try {
-          data = JSON.parse(text);
+          data = JSON.parse(text) as ExportJobData;
         } catch (e) {
           data = {};
         }
@@ -69,12 +72,13 @@ export function useExport(boardId: string): UseExportResult {
               
               if (pollContentType.includes('application/json')) {
                 const pollText = await pollResponse.data.text();
-                const jobStatus = JSON.parse(pollText) as {
+                interface JobStatusResponse {
                   status?: 'Pending' | 'Running' | 'Completed' | 'Failed';
                   progress?: number;
                   downloadUrl?: string;
                   error?: string;
-                };
+                }
+                const jobStatus = JSON.parse(pollText) as JobStatusResponse;
                 
                 if (jobStatus.progress !== undefined) {
                   setExportProgress(jobStatus.progress);
@@ -107,7 +111,8 @@ export function useExport(boardId: string): UseExportResult {
               setIsExporting(false);
               let errMsg = 'Export failed during polling';
               if (axios.isAxiosError(pollErr)) {
-                errMsg = pollErr.response?.data?.detail || pollErr.message || errMsg;
+                const errData = pollErr.response?.data as { detail?: string } | undefined;
+                errMsg = errData?.detail || pollErr.message || errMsg;
               } else if (pollErr instanceof Error) {
                 errMsg = pollErr.message;
               }
@@ -135,9 +140,14 @@ export function useExport(boardId: string): UseExportResult {
       let errMsg = 'Export failed';
       if (axios.isAxiosError(err)) {
         try {
-          const text = await err.response?.data?.text();
-          const detail = JSON.parse(text || '{}').detail;
-          errMsg = detail || err.message || errMsg;
+          const dataBlob = err.response?.data as Blob | undefined;
+          if (dataBlob) {
+            const text = await dataBlob.text();
+            const detail = (JSON.parse(text || '{}') as { detail?: string }).detail;
+            errMsg = detail || err.message || errMsg;
+          } else {
+            errMsg = err.message || errMsg;
+          }
         } catch {
           errMsg = err.message || errMsg;
         }
