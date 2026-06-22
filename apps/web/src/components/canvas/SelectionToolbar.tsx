@@ -25,6 +25,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useCanvasStore } from '@/store/useCanvasStore';
+import { cn } from '@/lib/utils';
 
 interface SelectionToolbarProps {
   isVisible: boolean;
@@ -42,10 +43,22 @@ const COLORS = [
   { label: 'Gray', value: 'bg-slate-50/90 border-slate-400 text-slate-900', dot: 'bg-slate-400 border-slate-500' },
 ];
 
+interface SelectionNodeData {
+  label?: string;
+  color?: string;
+  fontSize?: number;
+  fontFamily?: string;
+  textColor?: string;
+}
+
 export function SelectionToolbar({ isVisible, nodeId }: SelectionToolbarProps) {
   const deleteElements = useCanvasStore(s => s.deleteElements);
   const updateNodeColor = useCanvasStore(s => s.updateNodeColor);
+  const updateNodeTextStyle = useCanvasStore(s => s.updateNodeTextStyle);
   const nodes = useCanvasStore(s => s.nodes);
+
+  const currentNode = nodes.find(n => n.id === nodeId);
+  const nodeData = currentNode?.data as SelectionNodeData | undefined;
 
   const handleDelete = () => {
     const node = nodes.find(n => n.id === nodeId);
@@ -79,9 +92,111 @@ export function SelectionToolbar({ isVisible, nodeId }: SelectionToolbarProps) {
             </PopoverContent>
           </Popover>
           
-          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-background" title="Text Style">
-            <Type className="h-4 w-4" />
-          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-background" title="Text Style">
+                <Type className="h-4 w-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="center" className="w-64 p-3 space-y-3 bg-background border rounded-lg shadow-xl z-50">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Font Family</span>
+                <div className="grid grid-cols-3 gap-1">
+                  {[
+                    { name: 'Sans', value: 'sans', className: 'font-sans' },
+                    { name: 'Serif', value: 'serif', className: 'font-serif' },
+                    { name: 'Mono', value: 'mono', className: 'font-mono' },
+                  ].map((f) => (
+                    <Button
+                      key={f.value}
+                      variant={nodeData?.fontFamily === f.value ? 'secondary' : 'ghost'}
+                      size="sm"
+                      className={cn("h-7 text-xs font-semibold px-1", f.className)}
+                      onClick={() => updateNodeTextStyle(nodeId, { fontFamily: f.value })}
+                    >
+                      {f.name}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Font Size</span>
+                <div className="flex items-center gap-1.5">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-7" 
+                    onClick={() => {
+                      const currentSize = nodeData?.fontSize || 12;
+                      const sizes = [12, 14, 16, 18, 20, 24, 28, 32];
+                      const currentIndex = sizes.indexOf(currentSize);
+                      const nextSize = currentIndex > 0 ? sizes[currentIndex - 1] : Math.max(10, currentSize - 2);
+                      updateNodeTextStyle(nodeId, { fontSize: nextSize });
+                    }}
+                  >
+                    -
+                  </Button>
+                  <span className="text-xs font-bold w-10 text-center">{nodeData?.fontSize || 12}px</span>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-7 w-7" 
+                    onClick={() => {
+                      const currentSize = nodeData?.fontSize || 12;
+                      const sizes = [12, 14, 16, 18, 20, 24, 28, 32];
+                      const currentIndex = sizes.indexOf(currentSize);
+                      const nextSize = currentIndex !== -1 && currentIndex < sizes.length - 1 ? sizes[currentIndex + 1] : Math.min(48, currentSize + 2);
+                      updateNodeTextStyle(nodeId, { fontSize: nextSize });
+                    }}
+                  >
+                    +
+                  </Button>
+                  <div className="flex-1 flex gap-1 justify-end">
+                    {[12, 16, 20, 24].map((sz) => (
+                      <button
+                        key={sz}
+                        onClick={() => updateNodeTextStyle(nodeId, { fontSize: sz })}
+                        className={cn(
+                          "px-1.5 py-0.5 rounded text-[10px] border font-semibold transition-all",
+                          (nodeData?.fontSize || 12) === sz ? "bg-primary text-primary-foreground border-primary" : "bg-muted hover:bg-muted/80"
+                        )}
+                      >
+                        {sz}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider block">Text Color</span>
+                <div className="flex flex-wrap gap-1">
+                  {[
+                    { name: 'Default', value: 'black', bg: 'bg-slate-900 border-slate-800' },
+                    { name: 'Red', value: 'red', bg: 'bg-red-600 border-red-700' },
+                    { name: 'Green', value: 'green', bg: 'bg-green-600 border-green-700' },
+                    { name: 'Blue', value: 'blue', bg: 'bg-blue-600 border-blue-700' },
+                    { name: 'Yellow', value: 'yellow', bg: 'bg-yellow-500 border-yellow-600' },
+                    { name: 'Purple', value: 'purple', bg: 'bg-purple-600 border-purple-700' },
+                    { name: 'Orange', value: 'orange', bg: 'bg-orange-500 border-orange-600' },
+                    { name: 'Gray', value: 'gray', bg: 'bg-slate-500 border-slate-600' },
+                  ].map((c) => (
+                    <button
+                      key={c.value}
+                      title={c.name}
+                      onClick={() => updateNodeTextStyle(nodeId, { textColor: c.value })}
+                      className={cn(
+                        "h-5 w-5 rounded-full border shadow-sm transition-transform hover:scale-110",
+                        c.bg,
+                        nodeData?.textColor === c.value && "ring-2 ring-primary ring-offset-1"
+                      )}
+                    />
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
       </div>
 
       <div className="w-px h-4 bg-border mx-1" />

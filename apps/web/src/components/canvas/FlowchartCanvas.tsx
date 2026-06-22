@@ -12,7 +12,8 @@ import {
   Viewport,
   useReactFlow,
   SelectionMode,
-  ReactFlowProvider
+  ReactFlowProvider,
+  MarkerType
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCanvasStore } from "@/store/useCanvasStore";
@@ -98,13 +99,19 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
     const templateId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('template') || undefined : undefined;
     initialize(boardId, workspaceId, accessToken, userName, userId, "Flowchart", token, templateId, createdAt);
 
+    if (templateId && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('template');
+      window.history.replaceState({}, '', url.pathname + url.search);
+    }
+
     const handleOnline = () => {
       processQueue();
     };
 
     window.addEventListener('online', handleOnline);
     return () => window.removeEventListener('online', handleOnline);
-  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize, processQueue]);
+  }, [boardId, workspaceId, accessToken, userName, userId, token, initialize, processQueue, createdAt]);
 
   const onPaneMouseMove = useCallback((event: React.MouseEvent) => {
     const position = screenToFlowPosition({
@@ -198,6 +205,14 @@ function FlowchartCanvasContent({ boardId, workspaceId, accessToken, userName, u
         selectionMode={SelectionMode.Partial}
         deleteKeyCode={["Backspace", "Delete"]}
         fitView
+        isValidConnection={(connection) => connection.source !== connection.target}
+        defaultEdgeOptions={{
+          style: { strokeWidth: 2.5, stroke: '#94a3b8' },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: '#94a3b8',
+          },
+        }}
       >
         {!isExportMode && <Controls />}
         {!isExportMode && <MiniMap />}

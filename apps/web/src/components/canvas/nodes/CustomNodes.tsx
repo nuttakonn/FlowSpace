@@ -54,9 +54,12 @@ interface CustomNodeData {
   sublabel?: string;
   width?: number;
   height?: number;
+  fontSize?: number;
+  fontFamily?: string;
+  textColor?: string;
 }
 
-const NodeLabelInput = ({ id, label, className }: { id: string; label?: string; className?: string }) => {
+const NodeLabelInput = ({ id, label, className, data }: { id: string; label?: string; className?: string; data?: CustomNodeData }) => {
   const [value, setValue] = useState(label || '');
   const updateNodeLabel = useCanvasStore(s => s.updateNodeLabel);
 
@@ -72,6 +75,31 @@ const NodeLabelInput = ({ id, label, className }: { id: string; label?: string; 
     updateNodeLabel(id, value);
   };
 
+  const fontSizeClass = data?.fontSize === 12 ? 'text-xs'
+    : data?.fontSize === 14 ? 'text-sm'
+    : data?.fontSize === 16 ? 'text-base'
+    : data?.fontSize === 18 ? 'text-lg'
+    : data?.fontSize === 20 ? 'text-xl'
+    : data?.fontSize === 24 ? 'text-2xl'
+    : data?.fontSize === 28 ? 'text-3xl'
+    : data?.fontSize === 32 ? 'text-4xl'
+    : '';
+
+  const fontFamilyClass = data?.fontFamily === 'serif' ? 'font-serif'
+    : data?.fontFamily === 'mono' ? 'font-mono'
+    : data?.fontFamily === 'sans' ? 'font-sans'
+    : '';
+
+  const textColorClass = data?.textColor === 'black' ? 'text-slate-900 dark:text-slate-100'
+    : data?.textColor === 'red' ? 'text-red-600'
+    : data?.textColor === 'green' ? 'text-green-600'
+    : data?.textColor === 'blue' ? 'text-blue-600'
+    : data?.textColor === 'yellow' ? 'text-yellow-600'
+    : data?.textColor === 'purple' ? 'text-purple-600'
+    : data?.textColor === 'orange' ? 'text-orange-600'
+    : data?.textColor === 'gray' ? 'text-slate-500'
+    : '';
+
   return (
     <textarea
       value={value}
@@ -79,7 +107,10 @@ const NodeLabelInput = ({ id, label, className }: { id: string; label?: string; 
       onBlur={handleBlur}
       className={cn(
         "nodrag nowheel w-full bg-transparent text-center focus:outline-none resize-none overflow-hidden text-xs font-medium leading-relaxed whitespace-pre-wrap break-words",
-        className
+        className,
+        fontSizeClass,
+        fontFamilyClass,
+        textColorClass
       )}
       rows={1}
       spellCheck={false}
@@ -98,7 +129,7 @@ export const RectangleNode = memo(({ id, data, selected }: NodeProps) => {
     <div style={style} className={cn(`group flex items-center justify-center rounded-xl border-2 border-primary bg-background px-4 py-2 text-center transition-all`, nodeData.color, selected && 'ring-2 ring-primary ring-offset-2')}>
       <NodeResizer minWidth={80} minHeight={40} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
-      <NodeLabelInput id={id} label={nodeData.label} />
+      <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
       <SharedHandles />
     </div>
   );
@@ -119,7 +150,7 @@ export const DiamondNode = memo(({ id, data, selected }: NodeProps) => {
         style={{ clipPath: 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)' }}
       >
         <div className="-rotate-45 text-center px-6 w-full flex items-center justify-center">
-          <NodeLabelInput id={id} label={nodeData.label} />
+          <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
         </div>
       </div>
       <SharedHandles />
@@ -137,7 +168,7 @@ export const CircleNode = memo(({ id, data, selected }: NodeProps) => {
     <div style={style} className={cn(`group flex items-center justify-center rounded-full border-2 border-primary bg-background p-4 text-center transition-all`, nodeData.color, selected && 'ring-2 ring-primary ring-offset-2')}>
       <NodeResizer minWidth={60} minHeight={60} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
-      <NodeLabelInput id={id} label={nodeData.label} />
+      <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
       <SharedHandles />
     </div>
   );
@@ -156,7 +187,7 @@ export const DatabaseNode = memo(({ id, data, selected }: NodeProps) => {
       <div className={cn("absolute top-0 h-[15%] w-full rounded-[50%] border-2 border-primary bg-background z-10", nodeData.color)} />
       <div className={cn("flex h-full w-full flex-col items-center justify-center border-x-2 border-b-2 border-primary bg-background rounded-b-lg pt-[15%] px-2", nodeData.color)}>
         <p className="text-[8px] font-bold uppercase text-muted-foreground mb-1">DB</p>
-        <NodeLabelInput id={id} label={nodeData.label} />
+        <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
       </div>
       <SharedHandles />
     </div>
@@ -179,7 +210,7 @@ export const CloudNode = memo(({ id, data, selected }: NodeProps) => {
         <div className="absolute -top-4 right-2 h-[50%] w-[35%] rounded-full border-2 border-primary bg-background" />
       </div>
       <div className="z-10 text-center px-6 w-full">
-        <NodeLabelInput id={id} label={nodeData.label} />
+        <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
       </div>
       <SharedHandles />
     </div>
@@ -202,7 +233,7 @@ export const InfrastructureNode = memo(({ id, data, selected }: NodeProps) => {
           {Icon ? <Icon className="h-8 w-8" /> : <LucideIcons.Layers className="h-8 w-8" />}
        </div>
        <div className="text-center w-full px-2">
-          <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-bold" />
+          <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-bold" data={nodeData} />
           {nodeData.sublabel && <p className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-tighter">{nodeData.sublabel}</p>}
        </div>
        <SharedHandles />
@@ -223,7 +254,7 @@ export const ClientNode = memo(({ id, data, selected }: NodeProps) => {
        <div className="p-4 rounded-full bg-primary/10 text-primary mb-2">
           <LucideIcons.User className="h-8 w-8" />
        </div>
-       <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-bold" />
+       <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-bold" data={nodeData} />
        <SharedHandles />
     </div>
   );
@@ -241,7 +272,7 @@ export const MobileNode = memo(({ id, data, selected }: NodeProps) => {
        <SelectionToolbar isVisible={selected} nodeId={id} />
        <div className="w-12 h-1 bg-primary/20 rounded-full mb-6 mt-1" />
        <div className="flex-1 flex items-center justify-center w-full">
-          <NodeLabelInput id={id} label={nodeData.label} className="text-xs font-bold" />
+          <NodeLabelInput id={id} label={nodeData.label} className="text-xs font-bold" data={nodeData} />
        </div>
        <div className="w-4 h-4 border-2 border-primary/40 rounded-full mt-4 mb-1" />
        <SharedHandles />
@@ -270,7 +301,7 @@ export const BrowserNode = memo(({ id, data, selected }: NodeProps) => {
       </div>
       <div className="flex-1 p-8 flex items-center justify-center text-center overflow-auto">
         <div className="w-full max-w-md">
-          <NodeLabelInput id={id} label={nodeData.label} className="text-lg font-bold tracking-tight" />
+          <NodeLabelInput id={id} label={nodeData.label} className="text-lg font-bold tracking-tight" data={nodeData} />
           <div className="h-1 w-12 bg-primary/20 mx-auto mt-4 rounded-full" />
         </div>
       </div>
@@ -289,7 +320,7 @@ export const StickyNoteNode = memo(({ id, data, selected }: NodeProps) => {
     <div style={style} className={cn(`group relative flex flex-col items-center justify-center bg-yellow-50 border-2 border-yellow-200/50 shadow-xl p-8 text-center transition-all`, nodeData.color, selected && 'ring-4 ring-yellow-400/30')}>
       <NodeResizer minWidth={150} minHeight={150} isVisible={selected} lineClassName="border-yellow-400" handleClassName="h-3 w-3 bg-white border-2 border-yellow-400 rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
-      <NodeLabelInput id={id} label={nodeData.label} className="text-base font-semibold text-yellow-900" />
+      <NodeLabelInput id={id} label={nodeData.label} className="text-base font-semibold text-yellow-900" data={nodeData} />
       <div className="absolute bottom-0 right-0 h-10 w-10 bg-yellow-100/80" style={{ clipPath: 'polygon(100% 0, 0 100%, 100% 100%)' }} />
       <SharedHandles />
     </div>
@@ -306,7 +337,7 @@ export const TextNode = memo(({ id, data, selected }: NodeProps) => {
     <div style={style} className={cn(`group p-4 flex items-center justify-center transition-all`, nodeData.color, selected && 'ring-2 ring-primary ring-offset-2 rounded-lg bg-primary/5')}>
       <NodeResizer minWidth={100} minHeight={40} isVisible={selected} lineClassName="border-primary" handleClassName="h-3 w-3 bg-white border-2 border-primary rounded-full" />
       <SelectionToolbar isVisible={selected} nodeId={id} />
-      <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-medium" />
+      <NodeLabelInput id={id} label={nodeData.label} className="text-sm font-medium" data={nodeData} />
       <SharedHandles />
     </div>
   );
@@ -345,7 +376,7 @@ export const ParallelogramNode = memo(({ id, data, selected }: NodeProps) => {
         style={{ clipPath: 'polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%)' }}
       >
         <div className="text-center px-8 w-full flex items-center justify-center">
-          <NodeLabelInput id={id} label={nodeData.label} />
+          <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
         </div>
       </div>
       <SharedHandles />
@@ -368,7 +399,7 @@ export const TriangleNode = memo(({ id, data, selected }: NodeProps) => {
         style={{ clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)' }}
       >
         <div className="text-center pt-8 pb-2 px-6 w-full flex items-center justify-center">
-          <NodeLabelInput id={id} label={nodeData.label} />
+          <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
         </div>
       </div>
       <SharedHandles />
@@ -391,7 +422,7 @@ export const HexagonNode = memo(({ id, data, selected }: NodeProps) => {
         style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)' }}
       >
         <div className="text-center px-6 w-full flex items-center justify-center">
-          <NodeLabelInput id={id} label={nodeData.label} />
+          <NodeLabelInput id={id} label={nodeData.label} data={nodeData} />
         </div>
       </div>
       <SharedHandles />

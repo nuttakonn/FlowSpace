@@ -99,6 +99,7 @@ interface CanvasState {
   addNode: (type: string, position: { x: number; y: number }, data?: any) => void;
   updateNodeLabel: (id: string, label: string) => void;
   updateNodeColor: (id: string, color: string) => void;
+  updateNodeTextStyle: (id: string, style: { fontSize?: number; fontFamily?: string; textColor?: string }) => void;
   saveNodePosition: (node: Node) => void;
   deleteElements: (nodesToDelete: Node[], edgesToDelete: Edge[]) => void;
   
@@ -593,6 +594,18 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
           };
         });
 
+        const { yNodes, yEdges } = get();
+        fetchedNodes.forEach(node => {
+          if (!yNodes.has(node.id)) {
+            yNodes.set(node.id, node);
+          }
+        });
+        fetchedEdges.forEach(edge => {
+          if (!yEdges.has(edge.id)) {
+            yEdges.set(edge.id, edge);
+          }
+        });
+
         set((s) => ({ 
           nodes: [...fetchedNodes, ...s.nodes.filter(n => n.id.startsWith('temp-'))], 
           edges: [...fetchedEdges, ...s.edges.filter(e => e.id.startsWith('temp-'))] 
@@ -725,8 +738,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
             if (change.type === 'remove') {
                 if (yNodes.has(change.id)) {
                     yNodes.delete(change.id);
-                    get().enqueueMutation({ type: 'DELETE_NODE', tempId: change.id, payload: {} });
                 }
+                get().enqueueMutation({ type: 'DELETE_NODE', tempId: change.id, payload: {} });
             }
         });
       }
@@ -745,8 +758,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
             if (change.type === 'remove') {
                 if (yEdges.has(change.id)) {
                     yEdges.delete(change.id);
-                    get().enqueueMutation({ type: 'DELETE_EDGE', tempId: change.id, payload: {} });
                 }
+                get().enqueueMutation({ type: 'DELETE_EDGE', tempId: change.id, payload: {} });
             }
         });
       }
@@ -824,6 +837,32 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
       }
     },
 
+    updateNodeTextStyle: (id: string, style: { fontSize?: number; fontFamily?: string; textColor?: string }) => {
+      const { yNodes } = get();
+      const node = yNodes.get(id);
+      if (node) {
+        const updatedNode = { 
+          ...node, 
+          data: { 
+            ...node.data, 
+            fontSize: style.fontSize !== undefined ? style.fontSize : node.data.fontSize,
+            fontFamily: style.fontFamily !== undefined ? style.fontFamily : node.data.fontFamily,
+            textColor: style.textColor !== undefined ? style.textColor : node.data.textColor,
+          } 
+        };
+        const { selected, ...nodeToSave } = updatedNode;
+        yNodes.set(id, nodeToSave);
+        
+        const realId = get().resolveRealId(id);
+        if (!realId.startsWith('temp-')) {
+          get().enqueueMutation({ 
+            type: 'UPDATE_NODE', 
+            payload: { id: realId, type: updatedNode.type, x: updatedNode.position.x, y: updatedNode.position.y, metadata: JSON.stringify(updatedNode.data) } 
+          });
+        }
+      }
+    },
+
     saveNodePosition: (node) => {
       const { yNodes } = get();
       if (node.id.startsWith('preview-')) return;
@@ -846,14 +885,14 @@ export const useCanvasStore = create<CanvasState>((set, get) => {
         rNodesToDelete.forEach(node => {
           if (yNodes.has(node.id)) {
             yNodes.delete(node.id);
-            get().enqueueMutation({ type: 'DELETE_NODE', tempId: node.id, payload: {} });
           }
+          get().enqueueMutation({ type: 'DELETE_NODE', tempId: node.id, payload: {} });
         });
         rEdgesToDelete.forEach(edge => {
           if (yEdges.has(edge.id)) {
             yEdges.delete(edge.id);
-            get().enqueueMutation({ type: 'DELETE_EDGE', tempId: edge.id, payload: {} });
           }
+          get().enqueueMutation({ type: 'DELETE_EDGE', tempId: edge.id, payload: {} });
         });
       }
     },
